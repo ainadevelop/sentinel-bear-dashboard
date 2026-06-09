@@ -1,0 +1,146 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: var(--font-bebas), 'Arial Narrow', sans-serif;
+  --font-sans: var(--font-noto-jp), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+
+  --color-amber: var(--amber);
+  --color-amber-light: var(--amber-light);
+  --color-alert: var(--alert);
+  --color-forest: var(--forest);
+  --color-green: var(--green);
+
+  --color-primary: var(--amber);
+  --color-primary-foreground: var(--background);
+  --color-accent: var(--amber);
+  --color-accent-foreground: var(--background);
+  --color-destructive: var(--alert);
+  --color-ring: var(--amber);
+  --color-input: var(--border);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--card-foreground);
+  --color-secondary: var(--surface);
+  --color-secondary-foreground: var(--foreground);
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+}
+
+:root {
+  --background: #0a0805;
+  --surface: #130e08;
+  --foreground: #f0e8d8;
+  --card: #1e1408;
+  --card-foreground: #f0e8d8;
+  --muted: #1a130a;
+  --muted-foreground: #9a8878;
+  --border: rgba(200, 120, 10, 0.15);
+
+  --amber: #c8780a;
+  --amber-light: #f0a020;
+  --alert: #c02010;
+  --forest: #1a3018;
+  --green: #4a9e48;
+
+  --radius: 4px;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply bg-background;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+  /* JP / mono numerals tabular */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--amber);
+  }
+  .num-display {
+    font-family: var(--font-display);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(200, 120, 10, 0.3);
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+.pulse-dot {
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.slide-down {
+  animation: slide-down 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ping-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.ping-ring {
+  animation: ping-ring 2s ease-out infinite;
+}
