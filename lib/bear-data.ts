@@ -1,6 +1,7 @@
 import type { Detection, Station } from '@/lib/data'
 import type { DashboardKpi } from '@/lib/bear-context'
 import { weeklyData } from '@/lib/data'
+import { PI5_BASE } from '@/lib/api'
 
 const STATION_NAMES: Record<string, { name: string; prefecture: string }> = {
   'UMEDAYA-001': { name: '宇都宮市街地', prefecture: '栃木県' },
@@ -22,6 +23,8 @@ export interface BearEvent {
   timestamp: string
   station_id: string
   image_path?: string | null
+  image_url?: string | null
+  public_url?: string | null
 }
 
 export interface BearStatusResponse {
@@ -69,6 +72,20 @@ function mapStation(stats: BearStatsResponse, status: BearStatusResponse): Stati
   }
 }
 
+function resolveDetectionImage(event: BearEvent): string {
+  if (event.public_url) return event.public_url
+  if (event.image_url) {
+    return event.image_url.startsWith('http')
+      ? event.image_url
+      : `${PI5_BASE}${event.image_url}`
+  }
+  if (event.image_path) {
+    const name = event.image_path.split('/').pop()
+    if (name) return `${PI5_BASE}/bear-snapshots/${name}`
+  }
+  return '/placeholder.svg'
+}
+
 function mapDetection(event: BearEvent, index: number): Detection {
   const meta = STATION_NAMES[event.station_id] ?? {
     name: event.station_id,
@@ -91,7 +108,7 @@ function mapDetection(event: BearEvent, index: number): Detection {
     lineNotified: Boolean(event.image_path),
     mapX: 50,
     mapY: 50,
-    image: '/placeholder.svg',
+    image: resolveDetectionImage(event),
   }
 }
 

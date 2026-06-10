@@ -52,7 +52,16 @@ export function HistoryTab() {
               className="rounded-xl border border-alert/20 bg-white p-4 shadow-sm"
             >
               <div className="flex items-start gap-3">
-                <AlertGlyph size={26} urgent className="shrink-0 text-alert" />
+                {d.image && d.image !== '/placeholder.svg' ? (
+                  <img
+                    src={d.image}
+                    alt={`${d.stationName} 検知画像`}
+                    className="size-20 shrink-0 rounded-lg border border-border object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <AlertGlyph size={26} urgent className="shrink-0 text-alert" />
+                )}
                 <div className="min-w-0 flex-1">
                   <div className="text-base font-bold text-foreground">
                     {d.stationName}

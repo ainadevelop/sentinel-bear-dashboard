@@ -1,6 +1,22 @@
-const PI5_BASE = 'https://cam.ainadevelop.com'
+export const PI5_BASE = 'https://cam.ainadevelop.com'
 
 export const PI5_SNAPSHOT_URL = `${PI5_BASE}/api/snapshot`
+
+export interface BearSnapshotItem {
+  name: string
+  url: string
+  public_url: string
+  modified_at: string
+  size: number
+}
+
+export async function fetchBearSnapshots(limit = 100) {
+  const res = await fetch(`${PI5_BASE}/api/bear/snapshots?limit=${limit}`, {
+    next: { revalidate: 10 },
+  })
+  if (!res.ok) return { items: [] as BearSnapshotItem[], total: 0 }
+  return res.json() as Promise<{ items: BearSnapshotItem[]; total: number }>
+}
 
 export async function fetchBearStats() {
   const res = await fetch(`${PI5_BASE}/api/bear/stats`, { next: { revalidate: 10 } })

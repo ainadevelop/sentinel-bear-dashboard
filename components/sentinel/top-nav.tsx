@@ -7,6 +7,7 @@ export type TabKey =
   | 'overview'
   | 'camera'
   | 'history'
+  | 'album'
   | 'map'
   | 'analysis'
   | 'stations'
@@ -16,6 +17,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'overview', label: '警戒状況' },
   { key: 'camera', label: '監視映像' },
   { key: 'history', label: '検知履歴' },
+  { key: 'album', label: 'アルバム' },
   { key: 'map', label: '出没マップ' },
   { key: 'analysis', label: 'データ分析' },
   { key: 'stations', label: '監視設備' },
