@@ -1,9 +1,9 @@
 'use client'
 
 import { useBearDashboard } from '@/lib/bear-context'
-import { BearGlyph, SectionLabel, StatusDot } from './primitives'
+import { AlertGlyph, SectionLabel, StatusDot } from './primitives'
 
-function SimpleCard({
+function StatCard({
   title,
   value,
   note,
@@ -16,8 +16,8 @@ function SimpleCard({
 }) {
   return (
     <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
-      <div className="text-sm text-muted-foreground">{title}</div>
-      <div className="mt-2 text-3xl font-bold tabular" style={{ color: accent }}>
+      <div className="text-sm font-medium text-muted-foreground">{title}</div>
+      <div className="mt-2 text-2xl font-bold tabular" style={{ color: accent }}>
         {value}
       </div>
       {note && <div className="mt-2 text-sm text-muted-foreground">{note}</div>}
@@ -34,70 +34,86 @@ export function OverviewTab() {
   return (
     <div className="space-y-5">
       <div
-        className={`rounded-2xl border p-6 text-center shadow-sm ${
+        className={`rounded-2xl border-2 p-6 shadow-sm ${
           isSafe
-            ? 'border-green/30 bg-green/5'
-            : 'border-alert/30 bg-alert/5'
+            ? 'border-green/40 bg-green/5'
+            : 'border-alert bg-alert/5'
         }`}
       >
-        <div className="mx-auto mb-3 flex size-16 items-center justify-center rounded-full bg-white shadow-sm">
-          <BearGlyph size={36} className={isSafe ? 'text-green' : 'text-alert'} />
+        <div className="flex items-start gap-4">
+          <div
+            className={`flex size-14 shrink-0 items-center justify-center rounded-lg ${
+              isSafe ? 'bg-white' : 'bg-alert/10'
+            }`}
+          >
+            <AlertGlyph
+              size={32}
+              urgent={!isSafe}
+              className={isSafe ? 'text-green' : 'text-alert'}
+            />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold leading-snug text-foreground">
+              {isSafe
+                ? '現時点、熊の出没は確認されていません'
+                : '熊出没を検知しました'}
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              {isSafe
+                ? '監視カメラによる自動警戒を継続しています。出没が確認された場合、警告音の発報および関係者への通知を行います。'
+                : '警告音を発報し、関係者へ通知済みです。周辺の安全確認および警戒体制の強化をお願いいたします。'}
+            </p>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold text-foreground">
-          {isSafe ? '今はくまは見つかっていません' : 'くまを見つけました'}
-        </h1>
-        <p className="mt-2 text-base text-muted-foreground">
-          {isSafe
-            ? 'カメラは見張りを続けています。くまが来たら音とお知らせが届きます。'
-            : '警告音とお知らせを送りました。記録タブで詳しく見られます。'}
-        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <SimpleCard
-          title="今日くまを見つけた回数"
-          value={`${KPI.today} 回`}
-          accent={KPI.today > 0 ? 'var(--alert)' : 'var(--green)'}
+        <StatCard
+          title="本日の検知件数"
+          value={`${KPI.today} 件`}
+          accent={KPI.today > 0 ? 'var(--alert)' : 'var(--foreground)'}
         />
-        <SimpleCard
-          title="これまでの合計"
-          value={`${KPI.cumulative} 回`}
+        <StatCard
+          title="累計検知件数"
+          value={`${KPI.cumulative} 件`}
         />
-        <SimpleCard
-          title="カメラの状態"
-          value={cameraOk ? '動いています' : '確認が必要'}
-          note={cameraOk ? 'よく見えています' : '電源や配線を確認してください'}
+        <StatCard
+          title="監視設備の状態"
+          value={cameraOk ? '正常稼働' : '要確認'}
+          note={cameraOk ? '映像取得可能' : '設備の点検が必要です'}
           accent={cameraOk ? 'var(--green)' : 'var(--alert)'}
         />
       </div>
 
       <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
-        <SectionLabel>さいきんの記録</SectionLabel>
-        <p className="section-hint mt-1">くまを見つけたときの記録です</p>
+        <SectionLabel>直近の検知記録</SectionLabel>
+        <p className="section-hint mt-1">
+          熊と判定された検知の一覧です
+        </p>
 
         <div className="mt-4 space-y-3">
           {detections.length === 0 ? (
-            <div className="rounded-lg bg-muted px-4 py-8 text-center text-base text-muted-foreground">
-              まだ記録はありません
+            <div className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
+              検知記録はありません
             </div>
           ) : (
             detections.slice(0, 5).map((d) => (
               <div
                 key={d.id}
-                className="flex items-center gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3"
+                className="flex items-center gap-3 rounded-lg border border-alert/20 bg-alert/5 px-4 py-3"
               >
-                <BearGlyph size={22} className="text-amber" />
+                <AlertGlyph size={22} urgent className="text-alert" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-base font-medium text-foreground">
+                  <div className="text-sm font-semibold text-foreground">
                     {d.stationName}
                   </div>
-                  <div className="text-sm text-muted-foreground">{d.time}</div>
+                  <div className="text-xs text-muted-foreground">{d.time}</div>
                 </div>
                 <div className="text-right">
                   <div className="text-xl font-bold text-alert tabular">
                     {d.confidence}%
                   </div>
-                  <div className="text-xs text-muted-foreground">くまの可能性</div>
+                  <div className="text-xs text-muted-foreground">判定信頼度</div>
                 </div>
               </div>
             ))
@@ -107,13 +123,13 @@ export function OverviewTab() {
 
       {station && (
         <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
-          <SectionLabel>見張り場所</SectionLabel>
+          <SectionLabel>監視区域</SectionLabel>
           <div className="mt-3 flex items-center gap-3">
             <StatusDot status={station.status} />
             <div>
-              <div className="text-base font-medium">{station.name}</div>
+              <div className="text-base font-semibold">{station.name}</div>
               <div className="text-sm text-muted-foreground">
-                {station.prefecture} · 最後の確認 {station.lastSeen}
+                {station.prefecture} · 最終確認 {station.lastSeen}
               </div>
             </div>
           </div>

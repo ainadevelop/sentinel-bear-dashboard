@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { BearGlyph } from './primitives'
+import { AlertGlyph } from './primitives'
 
 export type TabKey = 'overview' | 'history' | 'stations'
 
 const TABS: { key: TabKey; label: string }[] = [
-  { key: 'overview', label: 'いまの様子' },
-  { key: 'history', label: 'これまでの記録' },
-  { key: 'stations', label: 'カメラの状態' },
+  { key: 'overview', label: '警戒状況' },
+  { key: 'history', label: '検知履歴' },
+  { key: 'stations', label: '監視設備' },
 ]
 
 export function TopNav({
@@ -24,7 +24,8 @@ export function TopNav({
     const update = () =>
       setNow(
         new Date().toLocaleString('ja-JP', {
-          month: 'numeric',
+          year: 'numeric',
+          month: 'long',
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit',
@@ -37,15 +38,20 @@ export function TopNav({
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-white shadow-sm">
+      <div className="h-1 w-full bg-alert" />
       <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 py-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex size-11 items-center justify-center rounded-full bg-amber/10">
-              <BearGlyph size={24} className="text-amber" />
+            <div className="flex size-11 items-center justify-center rounded-lg border border-alert/20 bg-alert/5">
+              <AlertGlyph size={24} className="text-alert" />
             </div>
             <div>
-              <div className="text-lg font-bold text-foreground">くま見張り番</div>
-              <div className="text-sm text-muted-foreground">梅田屋 上野</div>
+              <div className="text-lg font-bold tracking-tight text-foreground">
+                SENTINEL BEAR
+              </div>
+              <div className="text-sm font-medium text-muted-foreground">
+                宇都宮市街地 · 熊出没監視
+              </div>
             </div>
           </div>
           <div className="text-right">
@@ -54,7 +60,7 @@ export function TopNav({
                 <span className="absolute inline-flex size-2.5 rounded-full bg-green pulse-dot" />
                 <span className="inline-flex size-2.5 rounded-full bg-green" />
               </span>
-              <span className="text-sm font-medium text-green">見張り中</span>
+              <span className="text-sm font-semibold text-green">監視稼働中</span>
             </div>
             <div className="mt-1 text-xs text-muted-foreground">{now}</div>
           </div>
@@ -65,9 +71,9 @@ export function TopNav({
             <button
               key={t.key}
               onClick={() => onChange(t.key)}
-              className={`flex-1 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 rounded-lg px-3 py-3 text-sm font-semibold transition-colors ${
                 active === t.key
-                  ? 'bg-amber text-white shadow-sm'
+                  ? 'bg-alert text-white shadow-sm'
                   : 'bg-muted text-muted-foreground hover:bg-border'
               }`}
             >

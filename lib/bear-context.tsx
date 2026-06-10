@@ -60,9 +60,9 @@ interface BearDashboardContextValue {
 const BearDashboardContext = createContext<BearDashboardContextValue | null>(null)
 
 const STATION_NAMES: Record<string, { name: string; prefecture: string }> = {
-  'UMEDAYA-001': { name: '梅田屋 上野の畑', prefecture: '東京都' },
-  'BEAR-001': { name: '梅田屋 上野の畑', prefecture: '東京都' },
-  'TEST-001': { name: 'テスト用カメラ', prefecture: '東京都' },
+  'UMEDAYA-001': { name: '宇都宮市街地', prefecture: '栃木県' },
+  'BEAR-001': { name: '宇都宮市街地', prefecture: '栃木県' },
+  'TEST-001': { name: '宇都宮市街地（試験）', prefecture: '栃木県' },
 }
 
 function formatLastSeen(timestamp?: string | null) {
@@ -93,8 +93,8 @@ function mapStation(
     status: online ? 'online' : 'offline',
     battery: online ? 100 : 0,
     voltage: online ? 12.8 : 0,
-    lat: 35.712,
-    lng: 139.826,
+    lat: 36.555,
+    lng: 139.883,
     mapX: 50,
     mapY: 50,
     starlink: 0,

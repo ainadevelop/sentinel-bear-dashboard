@@ -1,4 +1,4 @@
-import { PawPrint } from 'lucide-react'
+import { ShieldAlert, TriangleAlert } from 'lucide-react'
 
 export function SectionLabel({
   children,
@@ -35,23 +35,30 @@ export function StatusDot({
   )
 }
 
-export function BearGlyph({
+/** 警戒・監視を示すアイコン（熊の足印は使用しない） */
+export function AlertGlyph({
   size = 18,
   className = 'text-amber',
+  urgent = false,
 }: {
   size?: number
   className?: string
+  urgent?: boolean
 }) {
+  const Icon = urgent ? TriangleAlert : ShieldAlert
   return (
     <span
       className={`inline-flex items-center justify-center ${className}`}
       role="img"
-      aria-label="くま"
+      aria-label={urgent ? '熊出没警報' : '熊出没監視'}
     >
-      <PawPrint style={{ width: size, height: size }} strokeWidth={2} />
+      <Icon style={{ width: size, height: size }} strokeWidth={2.2} />
     </span>
   )
 }
+
+/** @deprecated AlertGlyph を使用 */
+export const BearGlyph = AlertGlyph
 
 export function batteryColor(pct: number) {
   if (pct >= 50) return 'var(--green)'

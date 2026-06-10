@@ -11,6 +11,7 @@ import { BearDashboardProvider, useBearDashboard } from '@/lib/bear-context'
 function DashboardSkeleton() {
   return (
     <div className="min-h-screen animate-pulse bg-background">
+      <div className="h-1 bg-alert" />
       <div className="h-28 border-b border-border bg-white" />
       <main className="mx-auto max-w-3xl space-y-4 px-4 py-5">
         <div className="h-40 rounded-2xl bg-white" />
@@ -28,16 +29,16 @@ function DashboardError({ message, onRetry }: { message: string; onRetry: () => 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-6">
       <div className="max-w-md rounded-2xl border border-border bg-white p-8 text-center shadow-sm">
-        <h1 className="text-xl font-bold text-foreground">データを読み込めませんでした</h1>
-        <p className="mt-3 text-base text-muted-foreground">
-          ネットの状態を確認して、もう一度お試しください。
+        <h1 className="text-lg font-bold text-foreground">データの取得に失敗しました</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          通信状態を確認のうえ、再度お試しください。
         </p>
-        <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{message}</p>
         <button
           onClick={onRetry}
-          className="mt-6 rounded-xl bg-amber px-6 py-3 text-base font-medium text-white hover:bg-amber-light"
+          className="mt-6 rounded-lg bg-alert px-6 py-3 text-sm font-semibold text-white hover:opacity-90"
         >
-          もう一度読み込む
+          再読み込み
         </button>
       </div>
     </div>
@@ -65,7 +66,7 @@ function DashboardContent() {
 
   useEffect(() => {
     if (!alert) return
-    const t = setTimeout(() => setAlert(null), 10000)
+    const t = setTimeout(() => setAlert(null), 12000)
     return () => clearTimeout(t)
   }, [alert])
 
@@ -95,11 +96,11 @@ function DashboardContent() {
 
       <footer className="border-t border-border bg-white px-4 py-6">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-sm text-muted-foreground">
-            くまを見つけてから、お知らせまで約3秒
+          <p className="text-sm font-medium text-foreground">
+            検知から警告発報まで約3秒
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            くま見張り番 · 梅田屋 上野
+            SENTINEL BEAR · 宇都宮市街地 熊出没監視システム
           </p>
         </div>
       </footer>

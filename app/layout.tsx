@@ -9,8 +9,8 @@ const notoJp = Noto_Sans_JP({
 })
 
 export const metadata: Metadata = {
-  title: 'くま見張り番 — 梅田屋',
-  description: 'カメラでくまを見張り、見つけたらすぐお知らせします。',
+  title: 'SENTINEL BEAR — 宇都宮市街地 熊出没監視',
+  description: '宇都宮市街地における熊出没の自動検知・警告発報システム。',
 }
 
 export const viewport = {
