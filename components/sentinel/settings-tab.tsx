@@ -280,7 +280,7 @@ export function SettingsTab() {
         <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">発報の流れ</p>
           <p className="mt-2 text-foreground">
-            ① ピンポンパンポン → ② 案内（2回・「繰り返します」付き）→ ③ ピンポンパンポン
+            ① ダウンロードした警告音 → ② 案内（2回）→ ③ ピンポンパンポン（締め）
           </p>
         </div>
 
