@@ -123,7 +123,7 @@ export function SettingsTab() {
       if (playbackAbortRef.current) return
       await playOne('/bear/bear_closing.wav')
       if (playbackAbortRef.current) return
-      setSoundResult('ピンポンパンポン → 2回読み上げ → 締めチャイムで再生しました。')
+      setSoundResult('開始警告音 → 2回読み上げ → 締め警告音で再生しました。')
     } catch {
       if (!playbackAbortRef.current) {
         setSoundResult('ブラウザでの再生に失敗しました。音量とブラウザの自動再生設定を確認してください。')
@@ -280,7 +280,7 @@ export function SettingsTab() {
         <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">発報の流れ</p>
           <p className="mt-2 text-foreground">
-            ① ダウンロードした警告音 → ② 案内（2回）→ ③ ピンポンパンポン（締め）
+            ① ダウンロードした警告音 → ② 案内（2回）→ ③ ダウンロード（1）の締め音
           </p>
         </div>
 
