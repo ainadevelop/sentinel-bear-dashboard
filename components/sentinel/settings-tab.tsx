@@ -67,8 +67,20 @@ export function SettingsTab() {
     setSoundTesting(true)
     setSoundResult(null)
     try {
-      await triggerBearSoundTest()
-      setSoundResult('現地スピーカーから音声案内のテスト発報を実行しました。')
+      const result = await triggerBearSoundTest() as {
+        status?: string
+        message?: string
+        played?: boolean
+        hint?: string
+      }
+      if (result.played) {
+        setSoundResult(result.message ?? '現地スピーカーから音声案内を再生しました。')
+      } else {
+        setSoundResult(
+          [result.message, result.hint].filter(Boolean).join(' ') ||
+            '現地スピーカーから再生できませんでした。USB スピーカーの接続を確認してください。',
+        )
+      }
     } catch {
       setSoundResult('音声案内のテストに失敗しました。Pi5 の接続状態を確認してください。')
     } finally {
@@ -125,10 +137,18 @@ export function SettingsTab() {
           </p>
         </div>
 
+        <div className="rounded-lg border border-amber/30 bg-amber/10 p-4 text-sm leading-relaxed text-muted-foreground">
+          <p className="font-semibold text-amber">現地スピーカーについて</p>
+          <p className="mt-1">
+            Pi5 本体の HDMI 音声だけでは鳴らないことがあります。
+            屋外設置時は <strong className="text-foreground">USB スピーカー</strong> を接続してください。
+          </p>
+        </div>
+
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm leading-relaxed text-muted-foreground">
             <span className="font-semibold text-foreground">ブラウザで試聴</span>
-            — この端末のスピーカーから再生します。
+            — Microsoft 音声（Nanami）で生成した案内を、この端末から再生します。
           </p>
         </div>
 
