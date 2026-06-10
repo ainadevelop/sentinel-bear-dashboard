@@ -8,12 +8,7 @@ import {
   ResponsiveContainer,
   XAxis,
 } from 'recharts'
-import {
-  detections,
-  KPI,
-  stations,
-  weeklyData,
-} from '@/lib/data'
+import { useBearDashboard } from '@/lib/bear-context'
 import { BatteryBar, BearGlyph, SectionLabel, StatusDot } from './primitives'
 
 function KpiCard({
@@ -48,6 +43,8 @@ function KpiCard({
 }
 
 export function OverviewTab() {
+  const { detections, KPI, stations, weeklyData } = useBearDashboard()
+
   return (
     <div className="space-y-4">
       {/* KPI Row */}

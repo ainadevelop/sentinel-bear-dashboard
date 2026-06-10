@@ -9,7 +9,8 @@ import {
   Satellite,
   Plus,
 } from 'lucide-react'
-import { stations, type Station } from '@/lib/data'
+import { useBearDashboard } from '@/lib/bear-context'
+import type { Station } from '@/lib/data'
 import { batteryColor, SectionLabel } from './primitives'
 
 const statusMeta: Record<
@@ -177,6 +178,8 @@ function StatusChip({
 }
 
 export function StationsTab() {
+  const { stations } = useBearDashboard()
+
   return (
     <div className="relative space-y-4 pb-20">
       <SectionLabel>ステーション一覧 — {stations.length} 台</SectionLabel>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Plus, Trash2, Volume2 } from 'lucide-react'
-import { stations } from '@/lib/data'
+import { useBearDashboard } from '@/lib/bear-context'
 import { SectionLabel } from './primitives'
 
 function Field({
@@ -41,6 +41,7 @@ function Card({
 }
 
 export function SettingsTab() {
+  const { stations } = useBearDashboard()
   const [threshold, setThreshold] = useState(85)
   const [volume, setVolume] = useState(70)
   const [sound, setSound] = useState('熊撃退音')

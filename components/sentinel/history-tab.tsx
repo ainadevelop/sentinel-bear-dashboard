@@ -2,10 +2,11 @@
 
 import { useMemo, useState } from 'react'
 import { Calendar, Download, X } from 'lucide-react'
-import { detections, stations } from '@/lib/data'
+import { useBearDashboard } from '@/lib/bear-context'
 import { BearGlyph, SectionLabel } from './primitives'
 
 export function HistoryTab() {
+  const { detections, stations } = useBearDashboard()
   const [stationFilter, setStationFilter] = useState('all')
   const [threshold, setThreshold] = useState(50)
   const [enlarged, setEnlarged] = useState<string | null>(null)
@@ -17,7 +18,7 @@ export function HistoryTab() {
           (stationFilter === 'all' || d.stationId === stationFilter) &&
           d.confidence >= threshold,
       ),
-    [stationFilter, threshold],
+    [detections, stationFilter, threshold],
   )
 
   return (

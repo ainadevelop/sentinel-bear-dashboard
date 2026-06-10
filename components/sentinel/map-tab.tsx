@@ -1,19 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Plus,
   Minus,
   PanelRightClose,
   PanelRightOpen,
 } from 'lucide-react'
-import {
-  detectionTrail,
-  detections,
-  stations,
-  trailSpeed,
-  type Station,
-} from '@/lib/data'
+import { useBearDashboard } from '@/lib/bear-context'
+import { detectionTrail, trailSpeed, type Station } from '@/lib/data'
 import { SectionLabel, StatusDot, BearGlyph } from './primitives'
 
 type Layer = 'stations' | 'detections' | 'heatmap' | 'trail'
@@ -27,6 +22,7 @@ const markerColor = (s: Station['status']) =>
       : 'var(--muted-foreground)'
 
 export function MapTab() {
+  const { detections, stations } = useBearDashboard()
   const [panelOpen, setPanelOpen] = useState(true)
   const [layers, setLayers] = useState<Record<Layer, boolean>>({
     stations: true,
@@ -37,7 +33,17 @@ export function MapTab() {
   const [range, setRange] = useState<TimeRange>('7d')
   const [enabledStations, setEnabledStations] = useState<
     Record<string, boolean>
-  >(Object.fromEntries(stations.map((s) => [s.id, true])))
+  >({})
+
+  useEffect(() => {
+    setEnabledStations((prev) => {
+      const next = { ...prev }
+      for (const station of stations) {
+        if (!(station.id in next)) next[station.id] = true
+      }
+      return next
+    })
+  }, [stations])
 
   const toggleLayer = (l: Layer) =>
     setLayers((p) => ({ ...p, [l]: !p[l] }))
