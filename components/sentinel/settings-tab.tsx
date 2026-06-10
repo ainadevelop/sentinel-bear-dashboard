@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { AlertTriangle, Volume2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { AlertTriangle, Square, Volume2 } from 'lucide-react'
 import {
   fetchBearSettings,
   triggerBearSoundTest,
@@ -55,6 +55,75 @@ export function SettingsTab() {
   const [browserPlaying, setBrowserPlaying] = useState(false)
   const [soundResult, setSoundResult] = useState<string | null>(null)
   const [showSoundConfirm, setShowSoundConfirm] = useState(false)
+  const activeAudiosRef = useRef<HTMLAudioElement[]>([])
+  const playbackAbortRef = useRef(false)
+
+  useEffect(() => {
+    return () => {
+      for (const audio of activeAudiosRef.current) {
+        audio.pause()
+        audio.currentTime = 0
+      }
+      activeAudiosRef.current = []
+    }
+  }, [])
+
+  function stopBrowserPreview() {
+    playbackAbortRef.current = true
+    for (const audio of activeAudiosRef.current) {
+      audio.pause()
+      audio.currentTime = 0
+    }
+    activeAudiosRef.current = []
+    setBrowserPlaying(false)
+    setSoundResult('再生を停止しました。')
+  }
+
+  function toggleBrowserPreview() {
+    if (browserPlaying) {
+      stopBrowserPreview()
+      return
+    }
+    void playBrowserPreview()
+  }
+
+  async function playBrowserPreview() {
+    playbackAbortRef.current = false
+    setBrowserPlaying(true)
+    setSoundResult(null)
+    activeAudiosRef.current = []
+
+    const playOne = (src: string) =>
+      new Promise<void>((resolve, reject) => {
+        if (playbackAbortRef.current) {
+          resolve()
+          return
+        }
+        const audio = new Audio(src)
+        audio.volume = 0.85
+        activeAudiosRef.current.push(audio)
+        audio.onended = () => resolve()
+        audio.onerror = () => reject(new Error(src))
+        void audio.play().catch(reject)
+      })
+
+    try {
+      await playOne('/bear/bear_warning.wav')
+      if (playbackAbortRef.current) return
+      await playOne('/bear/bear_voice.wav')
+      if (playbackAbortRef.current) return
+      setSoundResult('警告音の後、「熊が出没した可能性があります。確認し、避難してください。」を読み上げました。')
+    } catch {
+      if (!playbackAbortRef.current) {
+        setSoundResult('ブラウザでの再生に失敗しました。音量とブラウザの自動再生設定を確認してください。')
+      }
+    } finally {
+      if (!playbackAbortRef.current) {
+        setBrowserPlaying(false)
+      }
+      activeAudiosRef.current = []
+    }
+  }
 
   useEffect(() => {
     void fetchBearSettings().then((data) => {
@@ -77,28 +146,6 @@ export function SettingsTab() {
       setSettingsMessage('設定の保存に失敗しました。Pi5 の接続状態を確認してください。')
     } finally {
       setSaving(false)
-    }
-  }
-
-  async function playBrowserPreview() {
-    setBrowserPlaying(true)
-    setSoundResult(null)
-    try {
-      const playOne = (src: string) =>
-        new Promise<void>((resolve, reject) => {
-          const audio = new Audio(src)
-          audio.volume = 0.85
-          audio.onended = () => resolve()
-          audio.onerror = () => reject(new Error(src))
-          void audio.play().catch(reject)
-        })
-      await playOne('/bear/bear_warning.wav')
-      await playOne('/bear/bear_voice.wav')
-      setSoundResult('警告音の後、「熊が出没した可能性があります。確認し、避難してください。」を読み上げました。')
-    } catch {
-      setSoundResult('ブラウザでの再生に失敗しました。音量とブラウザの自動再生設定を確認してください。')
-    } finally {
-      setBrowserPlaying(false)
     }
   }
 
@@ -222,7 +269,7 @@ export function SettingsTab() {
         <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">発報の流れ</p>
           <p className="mt-2 text-foreground">
-            ① 警告音（3連ビープ）→ ②「熊が出没した可能性があります。確認し、避難してください。」
+            ① 電子サイレン（警報音）→ ②「熊が出没した可能性があります。確認し、避難してください。」
           </p>
         </div>
 
@@ -242,12 +289,25 @@ export function SettingsTab() {
         </div>
 
         <button
-          onClick={() => void playBrowserPreview()}
-          disabled={browserPlaying}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-alert bg-white px-4 py-3 text-sm font-semibold text-alert hover:bg-alert/5 disabled:opacity-50"
+          type="button"
+          onClick={toggleBrowserPreview}
+          className={`flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold ${
+            browserPlaying
+              ? 'border-foreground bg-foreground text-white hover:opacity-90'
+              : 'border-alert bg-white text-alert hover:bg-alert/5'
+          }`}
         >
-          <Volume2 className="size-5" />
-          {browserPlaying ? '再生中…' : 'ブラウザで音声案内を聴く'}
+          {browserPlaying ? (
+            <>
+              <Square className="size-5" />
+              停止
+            </>
+          ) : (
+            <>
+              <Volume2 className="size-5" />
+              ブラウザで音声案内を聴く
+            </>
+          )}
         </button>
 
         <div className="rounded-lg border border-alert/30 bg-alert/5 p-4">
