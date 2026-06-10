@@ -1,5 +1,9 @@
 export const PI5_BASE = 'https://cam.ainadevelop.com'
 
+/** Pi5 bear_detector.py で固定。ダッシュボードからは変更不可 */
+export const BEAR_DETECTION_CONFIDENCE_PERCENT = 70
+export const BEAR_MONITORING_SCHEDULE = '24時間（無制限）'
+
 export const PI5_SNAPSHOT_URL = `${PI5_BASE}/api/snapshot`
 
 export interface BearSnapshotItem {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { AlertTriangle, Volume2 } from 'lucide-react'
-import { triggerBearSoundTest } from '@/lib/api'
+import { triggerBearSoundTest, BEAR_DETECTION_CONFIDENCE_PERCENT, BEAR_MONITORING_SCHEDULE } from '@/lib/api'
 import { useBearDashboard } from '@/lib/bear-context'
 import { SectionLabel } from './primitives'
 
@@ -41,7 +41,6 @@ function Card({
 
 export function SettingsTab() {
   const { stations } = useBearDashboard()
-  const [threshold, setThreshold] = useState(70)
   const [soundTesting, setSoundTesting] = useState(false)
   const [browserPlaying, setBrowserPlaying] = useState(false)
   const [soundResult, setSoundResult] = useState<string | null>(null)
@@ -102,30 +101,21 @@ export function SettingsTab() {
         <Field label="LINE 通知">
           <input className={inputCls} defaultValue="（管理者が設定済み）" readOnly />
         </Field>
-        <div>
-          <div className="mb-2 flex justify-between text-sm">
-            <span className="font-medium text-muted-foreground">検知判定の閾値</span>
-            <span className="font-bold text-alert">{threshold}%</span>
+        <div className="rounded-lg border border-border bg-muted/30 px-3 py-3">
+          <div className="text-sm font-medium text-muted-foreground">検知判定の閾値</div>
+          <div className="mt-1 text-base font-bold text-foreground">
+            {BEAR_DETECTION_CONFIDENCE_PERCENT}%（システム固定）
           </div>
-          <input
-            type="range"
-            min={60}
-            max={100}
-            value={threshold}
-            onChange={(e) => setThreshold(Number(e.target.value))}
-            className="w-full accent-alert"
-          />
           <p className="mt-2 text-xs text-muted-foreground">
-            この値以上の信頼度で熊出没と判定し、音声案内・通知を行います
+            誤操作による検知漏れを防ぐため、ダッシュボードからは変更できません。
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="監視開始時刻">
-            <input type="time" defaultValue="16:00" className={inputCls} />
-          </Field>
-          <Field label="監視終了時刻">
-            <input type="time" defaultValue="07:00" className={inputCls} />
-          </Field>
+        <div className="rounded-lg border border-border bg-muted/30 px-3 py-3">
+          <div className="text-sm font-medium text-muted-foreground">監視時間</div>
+          <div className="mt-1 text-base font-bold text-foreground">{BEAR_MONITORING_SCHEDULE}</div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            昼夜を問わず常時監視します。
+          </p>
         </div>
       </Card>
 
