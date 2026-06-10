@@ -110,9 +110,11 @@ export function SettingsTab() {
     try {
       await playOne('/bear/bear_warning.wav')
       if (playbackAbortRef.current) return
+      await new Promise((resolve) => setTimeout(resolve, 700))
+      if (playbackAbortRef.current) return
       await playOne('/bear/bear_voice.wav')
       if (playbackAbortRef.current) return
-      setSoundResult('警告音の後、「熊が出没した可能性があります。確認し、避難してください。」を読み上げました。')
+      setSoundResult('チャイムの後、案内をゆっくり読み上げました。')
     } catch {
       if (!playbackAbortRef.current) {
         setSoundResult('ブラウザでの再生に失敗しました。音量とブラウザの自動再生設定を確認してください。')
@@ -269,7 +271,7 @@ export function SettingsTab() {
         <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">発報の流れ</p>
           <p className="mt-2 text-foreground">
-            ① 電子サイレン（警報音）→ ②「熊が出没した可能性があります。確認し、避難してください。」
+            ① チャイム（3音）→ ② ゆっくり読み上げ「熊が出没した可能性があります。確認し、避難してください。」
           </p>
         </div>
 
@@ -284,7 +286,7 @@ export function SettingsTab() {
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm leading-relaxed text-muted-foreground">
             <span className="font-semibold text-foreground">ブラウザで試聴</span>
-            — 警告音のあと、Microsoft 音声（Nanami）で案内を読み上げます。
+            — チャイムのあと、ゆっくりはっきり読み上げます（屋外でも聞き取りやすい速度）。
           </p>
         </div>
 
