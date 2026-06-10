@@ -99,7 +99,7 @@ export function StationsTab() {
         />
         <DeviceChip
           icon={<Volume2 className="size-5" />}
-          label="警告音出力装置"
+          label="音声案内出力装置"
           ok={station.speaker}
         />
       </div>
@@ -107,7 +107,7 @@ export function StationsTab() {
       <div className="rounded-xl border border-alert/20 bg-alert/5 p-5">
         <p className="text-sm font-bold text-foreground">緊急時の対応</p>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          熊出没の検知、警告音の不発、設備異常が確認された場合は、
+          熊出没の検知、音声案内の不発、設備異常が確認された場合は、
           直ちに担当者へ連絡し、周辺住民の安全確保および関係機関への通報を検討してください。
         </p>
       </div>

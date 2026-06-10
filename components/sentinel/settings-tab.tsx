@@ -54,7 +54,7 @@ export function SettingsTab() {
       const audio = new Audio('/bear/bear_alert.wav')
       audio.volume = 0.8
       await audio.play()
-      setSoundResult('ブラウザから警告音を再生しました。')
+      setSoundResult('「熊が出没した可能性があります。確認し、避難してください。」を再生しました。')
     } catch {
       setSoundResult('ブラウザでの再生に失敗しました。音量とブラウザの自動再生設定を確認してください。')
     } finally {
@@ -68,9 +68,9 @@ export function SettingsTab() {
     setSoundResult(null)
     try {
       await triggerBearSoundTest()
-      setSoundResult('警告音のテスト発報を実行しました。スピーカーから音が鳴ることを確認してください。')
+      setSoundResult('現地スピーカーから音声案内のテスト発報を実行しました。')
     } catch {
-      setSoundResult('警告音のテストに失敗しました。Pi5 の接続状態を確認してください。')
+      setSoundResult('音声案内のテストに失敗しました。Pi5 の接続状態を確認してください。')
     } finally {
       setSoundTesting(false)
     }
@@ -104,7 +104,7 @@ export function SettingsTab() {
             className="w-full accent-alert"
           />
           <p className="mt-2 text-xs text-muted-foreground">
-            この値以上の信頼度で熊出没と判定し、警告音・通知を行います
+            この値以上の信頼度で熊出没と判定し、音声案内・通知を行います
           </p>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -117,11 +117,18 @@ export function SettingsTab() {
         </div>
       </Card>
 
-      <Card title="警告音の確認">
+      <Card title="音声案内の確認">
+        <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm leading-relaxed text-muted-foreground">
+          <p className="font-semibold text-foreground">発報内容</p>
+          <p className="mt-2 text-foreground">
+            「熊が出没した可能性があります。確認し、避難してください。」
+          </p>
+        </div>
+
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm leading-relaxed text-muted-foreground">
             <span className="font-semibold text-foreground">ブラウザで試聴</span>
-            — この端末のスピーカーから再生します。どこからでも確認できます。
+            — この端末のスピーカーから再生します。
           </p>
         </div>
 
@@ -131,7 +138,7 @@ export function SettingsTab() {
           className="flex w-full items-center justify-center gap-2 rounded-lg border border-alert bg-white px-4 py-3 text-sm font-semibold text-alert hover:bg-alert/5 disabled:opacity-50"
         >
           <Volume2 className="size-5" />
-          {browserPlaying ? '再生中…' : 'ブラウザで警告音を聴く'}
+          {browserPlaying ? '再生中…' : 'ブラウザで音声案内を聴く'}
         </button>
 
         <div className="rounded-lg border border-alert/30 bg-alert/5 p-4">
@@ -140,7 +147,7 @@ export function SettingsTab() {
             <div className="text-sm leading-relaxed text-muted-foreground">
               <p className="font-semibold text-alert">現地スピーカー（大音量）</p>
               <p className="mt-1">
-                Pi5 設置現場のスピーカーから実際の警告音を発報します。
+                Pi5 設置現場のスピーカーから同じ音声案内を発報します。
                 周囲の方へ事前に告知のうえ実行してください。
               </p>
             </div>
@@ -211,9 +218,10 @@ export function SettingsTab() {
             <div className="flex items-start gap-3">
               <AlertTriangle className="size-6 shrink-0 text-alert" />
               <div>
-                <h3 className="text-lg font-bold text-foreground">警告音テストを実行しますか？</h3>
+                <h3 className="text-lg font-bold text-foreground">音声案内テストを実行しますか？</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  現地のスピーカーから<strong className="text-foreground">大音量</strong>の警告音が鳴ります。
+                  現地のスピーカーから<strong className="text-foreground">大音量</strong>で
+                  「熊が出没した可能性があります。確認し、避難してください。」が流れます。
                   周囲の安全を確認し、了承のうえ実行してください。
                 </p>
               </div>

@@ -108,7 +108,7 @@ export function HistoryTab() {
       <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
         <SectionLabel>検知イベント履歴</SectionLabel>
         <p className="section-hint mt-1">
-          信頼度・警告音・通知の記録です（サービス再起動後はリセットされる場合があります）
+          信頼度・音声案内・通知の記録です（サービス再起動後はリセットされる場合があります）
         </p>
 
         <div className="mt-5">
@@ -162,7 +162,7 @@ export function HistoryTab() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {d.alarmFired && (
                       <span className="rounded-md border border-amber/30 bg-amber/10 px-3 py-1 text-xs font-medium text-amber">
-                        警告音発報済
+                        音声案内発報済
                       </span>
                     )}
                     {d.lineNotified && (
