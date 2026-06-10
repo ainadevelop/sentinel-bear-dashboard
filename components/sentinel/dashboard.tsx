@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { TopNav, type TabKey } from './top-nav'
 import { OverviewTab } from './overview-tab'
 import { CameraTab } from './camera-tab'
@@ -10,54 +10,24 @@ import { MapTab } from './map-tab'
 import { AnalysisTab } from './analysis-tab'
 import { SettingsTab } from './settings-tab'
 import { AlertBanner, type AlertData } from './alert-banner'
-import { BearDashboardProvider, useBearDashboard } from '@/lib/bear-context'
-
-function DashboardSkeleton() {
-  return (
-    <div className="min-h-screen animate-pulse bg-background">
-      <div className="h-1 bg-alert" />
-      <div className="h-32 border-b border-border bg-white" />
-      <main className="mx-auto max-w-6xl space-y-4 px-4 py-5">
-        <div className="h-40 rounded-2xl bg-white" />
-        <div className="grid gap-3 sm:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-24 rounded-xl bg-white" />
-          ))}
-        </div>
-      </main>
-    </div>
-  )
-}
-
-function DashboardError({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-6">
-      <div className="max-w-md rounded-2xl border border-border bg-white p-8 text-center shadow-sm">
-        <h1 className="text-lg font-bold text-foreground">データの取得に失敗しました</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          通信状態を確認のうえ、再度お試しください。
-        </p>
-        <p className="mt-2 text-xs text-muted-foreground">{message}</p>
-        <button
-          onClick={onRetry}
-          className="mt-6 rounded-lg bg-alert px-6 py-3 text-sm font-semibold text-white hover:opacity-90"
-        >
-          再読み込み
-        </button>
-      </div>
-    </div>
-  )
-}
+import {
+  BearDashboardProvider,
+  getMockDashboardData,
+  useBearDashboard,
+  type BearDashboardContextValue,
+} from '@/lib/bear-context'
+import { fetchBearEvents, fetchBearStats, fetchBearStatus } from '@/lib/api'
+import { buildDashboardData } from '@/lib/bear-data'
 
 function DashboardContent() {
-  const { loading, error, refresh, detections, stations } = useBearDashboard()
+  const { detections, stations, usingMock } = useBearDashboard()
   const [tab, setTab] = useState<TabKey>('overview')
   const [alert, setAlert] = useState<AlertData | null>(null)
   const lastAlertId = useRef<string | null>(null)
 
   useEffect(() => {
     const latest = detections[0]
-    if (!latest || latest.id === lastAlertId.current) return
+    if (!latest || latest.id === lastAlertId.current || usingMock) return
     if (latest.confidence < 70) return
 
     lastAlertId.current = latest.id
@@ -66,7 +36,7 @@ function DashboardContent() {
       station: `${station?.prefecture ?? ''} ${latest.stationName}`.trim(),
       confidence: latest.confidence,
     })
-  }, [detections, stations])
+  }, [detections, stations, usingMock])
 
   useEffect(() => {
     if (!alert) return
@@ -74,11 +44,14 @@ function DashboardContent() {
     return () => clearTimeout(t)
   }, [alert])
 
-  if (loading) return <DashboardSkeleton />
-  if (error) return <DashboardError message={error} onRetry={() => void refresh()} />
-
   return (
     <div className="min-h-screen bg-background">
+      {usingMock && (
+        <div className="border-b border-amber/30 bg-amber/10 px-4 py-2 text-center text-sm text-amber">
+          Pi5 に接続できません。デモデータを表示しています。
+        </div>
+      )}
+
       {alert && (
         <AlertBanner
           alert={alert}
@@ -117,8 +90,40 @@ function DashboardContent() {
 }
 
 export function Dashboard() {
+  const [dashboardData, setDashboardData] = useState<BearDashboardContextValue>({
+    ...getMockDashboardData(),
+    kpiLoading: true,
+    usingMock: false,
+  })
+
+  const refresh = useCallback(async () => {
+    try {
+      const [stats, events, status] = await Promise.all([
+        fetchBearStats(),
+        fetchBearEvents(20),
+        fetchBearStatus(),
+      ])
+
+      setDashboardData({
+        ...buildDashboardData(stats, events, status),
+        kpiLoading: false,
+        usingMock: false,
+      })
+    } catch {
+      setDashboardData({ ...getMockDashboardData(), kpiLoading: false })
+    }
+  }, [])
+
+  useEffect(() => {
+    void refresh()
+    const interval = setInterval(() => {
+      void refresh()
+    }, 10000)
+    return () => clearInterval(interval)
+  }, [refresh])
+
   return (
-    <BearDashboardProvider>
+    <BearDashboardProvider value={dashboardData}>
       <DashboardContent />
     </BearDashboardProvider>
   )

@@ -26,8 +26,21 @@ function StatCard({
   )
 }
 
+function KpiSkeleton() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-3">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="animate-pulse rounded-xl border border-border bg-white p-5 shadow-sm">
+          <div className="h-4 w-24 rounded bg-muted" />
+          <div className="mt-3 h-8 w-16 rounded bg-muted" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function OverviewTab() {
-  const { detections, KPI, stations, weeklyData } = useBearDashboard()
+  const { detections, KPI, stations, weeklyData, kpiLoading } = useBearDashboard()
   const station = stations[0]
   const isSafe = KPI.today === 0 && detections.length === 0
   const cameraOk = station?.status === 'online'
@@ -68,23 +81,27 @@ export function OverviewTab() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <StatCard
-          title="本日の検知件数"
-          value={`${KPI.today} 件`}
-          accent={KPI.today > 0 ? 'var(--alert)' : 'var(--foreground)'}
-        />
-        <StatCard
-          title="累計検知件数"
-          value={`${KPI.cumulative} 件`}
-        />
-        <StatCard
-          title="監視設備の状態"
-          value={cameraOk ? '正常稼働' : '要確認'}
-          note={cameraOk ? '映像取得可能' : '設備の点検が必要です'}
-          accent={cameraOk ? 'var(--green)' : 'var(--alert)'}
-        />
-      </div>
+      {kpiLoading ? (
+        <KpiSkeleton />
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-3">
+          <StatCard
+            title="本日の検知件数"
+            value={`${KPI.today} 件`}
+            accent={KPI.today > 0 ? 'var(--alert)' : 'var(--foreground)'}
+          />
+          <StatCard
+            title="累計検知件数"
+            value={`${KPI.cumulative} 件`}
+          />
+          <StatCard
+            title="監視設備の状態"
+            value={cameraOk ? '正常稼働' : '要確認'}
+            note={cameraOk ? '映像取得可能' : '設備の点検が必要です'}
+            accent={cameraOk ? 'var(--green)' : 'var(--alert)'}
+          />
+        </div>
+      )}
 
       <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
         <SectionLabel>直近の検知記録</SectionLabel>
