@@ -3,12 +3,23 @@
 import { useEffect, useState } from 'react'
 import { AlertGlyph } from './primitives'
 
-export type TabKey = 'overview' | 'history' | 'stations'
+export type TabKey =
+  | 'overview'
+  | 'camera'
+  | 'history'
+  | 'map'
+  | 'analysis'
+  | 'stations'
+  | 'settings'
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'overview', label: '警戒状況' },
+  { key: 'camera', label: '監視映像' },
   { key: 'history', label: '検知履歴' },
+  { key: 'map', label: '出没マップ' },
+  { key: 'analysis', label: 'データ分析' },
   { key: 'stations', label: '監視設備' },
+  { key: 'settings', label: '設定' },
 ]
 
 export function TopNav({
@@ -39,7 +50,7 @@ export function TopNav({
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-white shadow-sm">
       <div className="h-1 w-full bg-alert" />
-      <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 py-4">
+      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="flex size-11 items-center justify-center rounded-lg border border-alert/20 bg-alert/5">
@@ -66,12 +77,12 @@ export function TopNav({
           </div>
         </div>
 
-        <nav className="flex gap-2">
+        <nav className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => onChange(t.key)}
-              className={`flex-1 rounded-lg px-3 py-3 text-sm font-semibold transition-colors ${
+              className={`shrink-0 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
                 active === t.key
                   ? 'bg-alert text-white shadow-sm'
                   : 'bg-muted text-muted-foreground hover:bg-border'

@@ -1,5 +1,6 @@
 'use client'
 
+import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, XAxis } from 'recharts'
 import { useBearDashboard } from '@/lib/bear-context'
 import { AlertGlyph, SectionLabel, StatusDot } from './primitives'
 
@@ -26,7 +27,7 @@ function StatCard({
 }
 
 export function OverviewTab() {
-  const { detections, KPI, stations } = useBearDashboard()
+  const { detections, KPI, stations, weeklyData } = useBearDashboard()
   const station = stations[0]
   const isSafe = KPI.today === 0 && detections.length === 0
   const cameraOk = station?.status === 'online'
@@ -118,6 +119,24 @@ export function OverviewTab() {
               </div>
             ))
           )}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
+        <SectionLabel>週次検知件数</SectionLabel>
+        <p className="section-hint mt-1">直近1週間の検知推移（参考）</p>
+        <div className="mt-4 h-48">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={weeklyData} margin={{ top: 20, bottom: 0 }}>
+              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
+              <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={40}>
+                <LabelList dataKey="count" position="top" fontSize={11} />
+                {weeklyData.map((entry, i) => (
+                  <Cell key={i} fill={entry.today ? 'var(--alert)' : '#94a3b8'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

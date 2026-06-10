@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Volume2 } from 'lucide-react'
+import { AlertTriangle, Volume2 } from 'lucide-react'
+import { triggerBearSoundTest } from '@/lib/api'
 import { useBearDashboard } from '@/lib/bear-context'
 import { SectionLabel } from './primitives'
 
@@ -14,16 +15,14 @@ function Field({
 }) {
   return (
     <label className="block">
-      <div className="mb-1.5 font-mono text-[10px] text-muted-foreground">
-        {label}
-      </div>
+      <div className="mb-1.5 text-sm font-medium text-muted-foreground">{label}</div>
       {children}
     </label>
   )
 }
 
 const inputCls =
-  'w-full rounded-sm bg-black/30 px-3 py-2 text-sm text-foreground outline-none ring-amber placeholder:text-muted-foreground/60 focus:ring-1'
+  'w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm text-foreground outline-none focus:border-alert focus:ring-1 focus:ring-alert'
 
 function Card({
   title,
@@ -33,7 +32,7 @@ function Card({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-md bg-card p-5">
+    <section className="rounded-xl border border-border bg-white p-5 shadow-sm">
       <SectionLabel>{title}</SectionLabel>
       <div className="mt-4 space-y-4">{children}</div>
     </section>
@@ -42,28 +41,43 @@ function Card({
 
 export function SettingsTab() {
   const { stations } = useBearDashboard()
-  const [threshold, setThreshold] = useState(85)
-  const [volume, setVolume] = useState(70)
-  const [sound, setSound] = useState('熊撃退音')
+  const [threshold, setThreshold] = useState(70)
+  const [soundTesting, setSoundTesting] = useState(false)
+  const [soundResult, setSoundResult] = useState<string | null>(null)
+  const [showSoundConfirm, setShowSoundConfirm] = useState(false)
+
+  async function runSoundTest() {
+    setShowSoundConfirm(false)
+    setSoundTesting(true)
+    setSoundResult(null)
+    try {
+      await triggerBearSoundTest()
+      setSoundResult('警告音のテスト発報を実行しました。スピーカーから音が鳴ることを確認してください。')
+    } catch {
+      setSoundResult('警告音のテストに失敗しました。Pi5 の接続状態を確認してください。')
+    } finally {
+      setSoundTesting(false)
+    }
+  }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      {/* 通知設定 */}
+    <div className="grid gap-5 lg:grid-cols-2">
       <Card title="通知設定">
         <Field label="Discord Webhook URL">
           <input
             className={inputCls}
             placeholder="https://discord.com/api/webhooks/..."
-            defaultValue="https://discord.com/api/webhooks/****"
+            defaultValue="（管理者が設定済み）"
+            readOnly
           />
         </Field>
-        <Field label="LINE チャンネル ID">
-          <input className={inputCls} placeholder="U1a2b3c4..." />
+        <Field label="LINE 通知">
+          <input className={inputCls} defaultValue="（管理者が設定済み）" readOnly />
         </Field>
         <div>
-          <div className="mb-1.5 flex justify-between font-mono text-[10px] text-muted-foreground">
-            <span>検知信頼度閾値</span>
-            <span className="text-amber-light">{threshold}%</span>
+          <div className="mb-2 flex justify-between text-sm">
+            <span className="font-medium text-muted-foreground">検知判定の閾値</span>
+            <span className="font-bold text-alert">{threshold}%</span>
           </div>
           <input
             type="range"
@@ -71,107 +85,124 @@ export function SettingsTab() {
             max={100}
             value={threshold}
             onChange={(e) => setThreshold(Number(e.target.value))}
-            className="w-full accent-amber"
+            className="w-full accent-alert"
           />
+          <p className="mt-2 text-xs text-muted-foreground">
+            この値以上の信頼度で熊出没と判定し、警告音・通知を行います
+          </p>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="稼働開始時刻">
+          <Field label="監視開始時刻">
             <input type="time" defaultValue="16:00" className={inputCls} />
           </Field>
-          <Field label="稼働終了時刻">
+          <Field label="監視終了時刻">
             <input type="time" defaultValue="07:00" className={inputCls} />
           </Field>
         </div>
       </Card>
 
-      {/* 警告音設定 */}
-      <Card title="警告音設定">
-        <Field label="音源選択">
-          <select
-            value={sound}
-            onChange={(e) => setSound(e.target.value)}
-            className={inputCls}
-          >
-            <option>標準アラート</option>
-            <option>熊撃退音</option>
-            <option>カスタム</option>
-          </select>
-        </Field>
-        <div>
-          <div className="mb-1.5 flex justify-between font-mono text-[10px] text-muted-foreground">
-            <span>音量設定</span>
-            <span className="text-amber-light">{volume}%</span>
+      <Card title="警告音の確認">
+        <div className="rounded-lg border border-alert/30 bg-alert/5 p-4">
+          <div className="flex gap-3">
+            <AlertTriangle className="size-5 shrink-0 text-alert" />
+            <div className="text-sm leading-relaxed text-muted-foreground">
+              <p className="font-semibold text-alert">大音量が出る可能性があります</p>
+              <p className="mt-1">
+                テスト発報を実行すると、現地のスピーカーから警告音が鳴ります。
+                周囲の方へ事前に告知のうえ、音量にご注意ください。
+              </p>
+            </div>
           </div>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={volume}
-            onChange={(e) => setVolume(Number(e.target.value))}
-            className="w-full accent-amber"
-          />
         </div>
-        <button className="flex items-center gap-2 rounded-sm bg-amber px-4 py-2.5 text-sm font-medium text-background hover:bg-amber-light">
-          <Volume2 className="size-4" />
-          テスト発報
+
+        <button
+          onClick={() => setShowSoundConfirm(true)}
+          disabled={soundTesting}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-alert px-4 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+        >
+          <Volume2 className="size-5" />
+          {soundTesting ? '発報中…' : '警告音テスト発報'}
         </button>
+
+        {soundResult && (
+          <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-foreground">
+            {soundResult}
+          </p>
+        )}
       </Card>
 
-      {/* ステーション管理 */}
-      <Card title="ステーション管理">
+      <Card title="監視区域">
         <div className="space-y-2">
           {stations.map((s) => (
             <div
               key={s.id}
-              className="flex items-center gap-3 rounded-sm bg-black/20 px-3 py-2.5"
+              className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 px-3 py-3"
             >
               <div className="min-w-0 flex-1">
-                <div className="font-mono text-[10px] text-amber">{s.id}</div>
-                <div className="truncate text-sm text-foreground">
-                  {s.prefecture} {s.name}
-                </div>
-                <div className="font-mono text-[9px] text-muted-foreground">
-                  {s.lat.toFixed(2)}, {s.lng.toFixed(2)} · Starlink{' '}
-                  {s.starlink > 0 ? '接続' : '切断'}
+                <div className="text-sm font-semibold text-foreground">{s.name}</div>
+                <div className="text-xs text-muted-foreground">
+                  {s.prefecture} · ID {s.id}
                 </div>
               </div>
-              <button className="rounded-sm bg-white/5 px-2.5 py-1.5 text-xs text-foreground hover:bg-white/10">
-                編集
-              </button>
-              <button
-                className="rounded-sm bg-alert/15 p-1.5 text-alert hover:bg-alert/25"
-                aria-label="削除"
+              <span
+                className={`rounded-md px-2 py-1 text-xs font-medium ${
+                  s.status === 'online'
+                    ? 'bg-green/10 text-green'
+                    : 'bg-alert/10 text-alert'
+                }`}
               >
-                <Trash2 className="size-4" />
-              </button>
+                {s.status === 'online' ? '稼働中' : '要確認'}
+              </span>
             </div>
           ))}
         </div>
-        <button className="flex w-full items-center justify-center gap-2 rounded-sm border border-dashed border-amber/40 py-2.5 text-sm text-amber-light hover:bg-amber/5">
-          <Plus className="size-4" />
-          ステーション追加
-        </button>
       </Card>
 
-      {/* アカウント設定 */}
-      <Card title="アカウント設定">
+      <Card title="担当者情報">
         <Field label="組織名">
-          <input className={inputCls} defaultValue="遠野市農業協同組合" />
+          <input className={inputCls} defaultValue="宇都宮市（監視協定先）" />
         </Field>
         <Field label="担当者名">
-          <input className={inputCls} defaultValue="佐藤 健一" />
+          <input className={inputCls} placeholder="担当者名" />
         </Field>
-        <Field label="メールアドレス">
-          <input
-            type="email"
-            className={inputCls}
-            defaultValue="k.sato@tono-ja.example.jp"
-          />
+        <Field label="連絡先メール">
+          <input type="email" className={inputCls} placeholder="example@city.utsunomiya.tochigi.jp" />
         </Field>
-        <button className="rounded-sm bg-amber px-4 py-2.5 text-sm font-medium text-background hover:bg-amber-light">
+        <button className="rounded-lg bg-foreground px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90">
           変更を保存
         </button>
       </Card>
+
+      {showSoundConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="max-w-md rounded-2xl border border-border bg-white p-6 shadow-xl">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="size-6 shrink-0 text-alert" />
+              <div>
+                <h3 className="text-lg font-bold text-foreground">警告音テストを実行しますか？</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  現地のスピーカーから<strong className="text-foreground">大音量</strong>の警告音が鳴ります。
+                  周囲の安全を確認し、了承のうえ実行してください。
+                </p>
+              </div>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowSoundConfirm(false)}
+                className="flex-1 rounded-lg border border-border bg-muted px-4 py-3 text-sm font-semibold text-foreground"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={() => void runSoundTest()}
+                className="flex-1 rounded-lg bg-alert px-4 py-3 text-sm font-semibold text-white"
+              >
+                実行する
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

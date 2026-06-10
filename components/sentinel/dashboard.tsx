@@ -3,8 +3,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { TopNav, type TabKey } from './top-nav'
 import { OverviewTab } from './overview-tab'
+import { CameraTab } from './camera-tab'
 import { StationsTab } from './stations-tab'
 import { HistoryTab } from './history-tab'
+import { MapTab } from './map-tab'
+import { AnalysisTab } from './analysis-tab'
+import { SettingsTab } from './settings-tab'
 import { AlertBanner, type AlertData } from './alert-banner'
 import { BearDashboardProvider, useBearDashboard } from '@/lib/bear-context'
 
@@ -12,8 +16,8 @@ function DashboardSkeleton() {
   return (
     <div className="min-h-screen animate-pulse bg-background">
       <div className="h-1 bg-alert" />
-      <div className="h-28 border-b border-border bg-white" />
-      <main className="mx-auto max-w-3xl space-y-4 px-4 py-5">
+      <div className="h-32 border-b border-border bg-white" />
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-5">
         <div className="h-40 rounded-2xl bg-white" />
         <div className="grid gap-3 sm:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -88,14 +92,18 @@ function DashboardContent() {
 
       <TopNav active={tab} onChange={setTab} />
 
-      <main className="mx-auto max-w-3xl px-4 py-5">
+      <main className="mx-auto max-w-6xl px-4 py-5">
         {tab === 'overview' && <OverviewTab />}
+        {tab === 'camera' && <CameraTab />}
         {tab === 'history' && <HistoryTab />}
+        {tab === 'map' && <MapTab />}
+        {tab === 'analysis' && <AnalysisTab />}
         {tab === 'stations' && <StationsTab />}
+        {tab === 'settings' && <SettingsTab />}
       </main>
 
       <footer className="border-t border-border bg-white px-4 py-6">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-6xl text-center">
           <p className="text-sm font-medium text-foreground">
             検知から警告発報まで約3秒
           </p>
