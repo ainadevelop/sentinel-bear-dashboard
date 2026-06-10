@@ -1,8 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AlertTriangle, Volume2 } from 'lucide-react'
-import { triggerBearSoundTest, BEAR_DETECTION_CONFIDENCE_PERCENT, BEAR_MONITORING_SCHEDULE } from '@/lib/api'
+import {
+  fetchBearSettings,
+  triggerBearSoundTest,
+  updateBearSettings,
+  type BearSensitivity,
+  type BearSettingsResponse,
+} from '@/lib/api'
 import { useBearDashboard } from '@/lib/bear-context'
 import { SectionLabel } from './primitives'
 
@@ -41,10 +47,38 @@ function Card({
 
 export function SettingsTab() {
   const { stations } = useBearDashboard()
+  const [settings, setSettings] = useState<BearSettingsResponse | null>(null)
+  const [selected, setSelected] = useState<BearSensitivity>('standard')
+  const [saving, setSaving] = useState(false)
+  const [settingsMessage, setSettingsMessage] = useState<string | null>(null)
   const [soundTesting, setSoundTesting] = useState(false)
   const [browserPlaying, setBrowserPlaying] = useState(false)
   const [soundResult, setSoundResult] = useState<string | null>(null)
   const [showSoundConfirm, setShowSoundConfirm] = useState(false)
+
+  useEffect(() => {
+    void fetchBearSettings().then((data) => {
+      if (!data) return
+      setSettings(data)
+      setSelected(data.sensitivity)
+    })
+  }, [])
+
+  async function saveDetectionSettings() {
+    if (!settings || selected === settings.sensitivity) return
+    setSaving(true)
+    setSettingsMessage(null)
+    try {
+      const updated = await updateBearSettings(selected)
+      setSettings(updated)
+      setSelected(updated.sensitivity)
+      setSettingsMessage('カメラ検知設定を保存しました。')
+    } catch {
+      setSettingsMessage('設定の保存に失敗しました。Pi5 の接続状態を確認してください。')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   async function playBrowserPreview() {
     setBrowserPlaying(true)
@@ -89,7 +123,78 @@ export function SettingsTab() {
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
-      <Card title="通知設定">
+      <Card title="カメラ検知設定">
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          同じ映像のまま変化がない場合、Discord には再通知しません。
+        </p>
+
+        <div className="space-y-3">
+          {(settings?.options ?? [
+            {
+              id: 'standard' as BearSensitivity,
+              label: '標準',
+              description: '誤通知を抑え、映像に変化があった場合のみ Discord へ通知します（推奨）',
+              confidence_percent: 70,
+            },
+            {
+              id: 'high' as BearSensitivity,
+              label: '高感度',
+              description: '検知しやすく設定。映像の変化がある場合に通知します',
+              confidence_percent: 55,
+            },
+          ]).map((option) => (
+            <label
+              key={option.id}
+              className={`flex cursor-pointer gap-3 rounded-xl border p-4 transition ${
+                selected === option.id
+                  ? 'border-alert bg-alert/5 shadow-sm'
+                  : 'border-border bg-white hover:border-alert/30'
+              }`}
+            >
+              <input
+                type="radio"
+                name="bear-sensitivity"
+                value={option.id}
+                checked={selected === option.id}
+                onChange={() => setSelected(option.id)}
+                className="mt-1 accent-alert"
+              />
+              <div>
+                <div className="font-semibold text-foreground">
+                  {option.label}
+                  <span className="ml-2 text-xs font-medium text-muted-foreground">
+                    判定 {option.confidence_percent}% 以上
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">{option.description}</p>
+              </div>
+            </label>
+          ))}
+        </div>
+
+        <button
+          onClick={() => void saveDetectionSettings()}
+          disabled={saving || !settings || selected === settings.sensitivity}
+          className="w-full rounded-lg bg-foreground px-4 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+        >
+          {saving ? '保存中…' : '検知設定を保存'}
+        </button>
+
+        {settingsMessage && (
+          <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-foreground">
+            {settingsMessage}
+          </p>
+        )}
+
+        <div className="rounded-lg border border-border bg-muted/30 px-3 py-3">
+          <div className="text-sm font-medium text-muted-foreground">監視時間</div>
+          <div className="mt-1 text-base font-bold text-foreground">
+            {settings?.monitoring_schedule ?? '24時間（無制限）'}
+          </div>
+        </div>
+      </Card>
+
+      <Card title="通知連携">
         <Field label="Discord Webhook URL">
           <input
             className={inputCls}
@@ -101,22 +206,9 @@ export function SettingsTab() {
         <Field label="LINE 通知">
           <input className={inputCls} defaultValue="（管理者が設定済み）" readOnly />
         </Field>
-        <div className="rounded-lg border border-border bg-muted/30 px-3 py-3">
-          <div className="text-sm font-medium text-muted-foreground">検知判定の閾値</div>
-          <div className="mt-1 text-base font-bold text-foreground">
-            {BEAR_DETECTION_CONFIDENCE_PERCENT}%（システム固定）
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            誤操作による検知漏れを防ぐため、ダッシュボードからは変更できません。
-          </p>
-        </div>
-        <div className="rounded-lg border border-border bg-muted/30 px-3 py-3">
-          <div className="text-sm font-medium text-muted-foreground">監視時間</div>
-          <div className="mt-1 text-base font-bold text-foreground">{BEAR_MONITORING_SCHEDULE}</div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            昼夜を問わず常時監視します。
-          </p>
-        </div>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          Webhook URL の変更は管理者のみ。Discord 通知の頻度は上の「カメラ検知設定」で制御します。
+        </p>
       </Card>
 
       <Card title="音声案内の確認">

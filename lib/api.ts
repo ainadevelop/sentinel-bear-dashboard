@@ -1,10 +1,45 @@
 export const PI5_BASE = 'https://cam.ainadevelop.com'
 
-/** Pi5 bear_detector.py で固定。ダッシュボードからは変更不可 */
-export const BEAR_DETECTION_CONFIDENCE_PERCENT = 70
-export const BEAR_MONITORING_SCHEDULE = '24時間（無制限）'
-
 export const PI5_SNAPSHOT_URL = `${PI5_BASE}/api/snapshot`
+
+export type BearSensitivity = 'standard' | 'high'
+
+export interface BearSettingsOption {
+  id: BearSensitivity
+  label: string
+  description: string
+  confidence_percent: number
+}
+
+export interface BearSettingsResponse {
+  status: string
+  sensitivity: BearSensitivity
+  monitoring_schedule: string
+  notify_on_unchanged_scene: boolean
+  options: BearSettingsOption[]
+  current: {
+    label: string
+    confidence_percent: number
+    notify_min_interval_sec: number
+  }
+}
+
+export async function fetchBearSettings(): Promise<BearSettingsResponse | null> {
+  const res = await fetch(`${PI5_BASE}/api/bear/settings`, { next: { revalidate: 30 } })
+  if (!res.ok) return null
+  return res.json()
+}
+
+export async function updateBearSettings(sensitivity: BearSensitivity) {
+  const res = await fetch(`${PI5_BASE}/api/bear/settings`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sensitivity }),
+    cache: 'no-store',
+  })
+  if (!res.ok) throw new Error('settings update failed')
+  return res.json() as Promise<BearSettingsResponse>
+}
 
 export interface BearSnapshotItem {
   name: string

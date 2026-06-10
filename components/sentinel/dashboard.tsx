@@ -17,7 +17,6 @@ import {
   type BearDashboardContextValue,
 } from '@/lib/bear-context'
 import {
-  BEAR_DETECTION_CONFIDENCE_PERCENT,
   fetchBearEvents,
   fetchBearStats,
   fetchBearStatus,
@@ -33,7 +32,6 @@ function DashboardContent() {
   useEffect(() => {
     const latest = detections[0]
     if (!latest || latest.id === lastAlertId.current || usingMock) return
-    if (latest.confidence < BEAR_DETECTION_CONFIDENCE_PERCENT) return
 
     lastAlertId.current = latest.id
     const station = stations.find((s) => s.id === latest.stationId)
