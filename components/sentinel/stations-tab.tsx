@@ -1,176 +1,39 @@
 'use client'
 
-import { useState } from 'react'
-import {
-  ChevronDown,
-  Camera,
-  Volume2,
-  Sun,
-  Satellite,
-  Plus,
-} from 'lucide-react'
+import { Camera, Volume2 } from 'lucide-react'
 import { useBearDashboard } from '@/lib/bear-context'
-import type { Station } from '@/lib/data'
-import { batteryColor, SectionLabel } from './primitives'
+import { SectionLabel, StatusDot } from './primitives'
 
-const statusMeta: Record<
-  Station['status'],
-  { label: string; border: string; badge: string }
-> = {
-  online: {
-    label: 'ONLINE',
-    border: 'var(--green)',
-    badge: 'bg-green/15 text-green',
-  },
-  warning: {
-    label: 'WARNING',
-    border: 'var(--amber-light)',
-    badge: 'bg-amber/15 text-amber-light',
-  },
-  offline: {
-    label: 'OFFLINE',
-    border: 'var(--muted-foreground)',
-    badge: 'bg-white/5 text-muted-foreground',
-  },
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between border-b border-border/50 py-2">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="font-mono text-xs text-foreground">{value}</span>
+    <div className="flex items-center justify-between border-b border-border py-3 last:border-0">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-base font-medium text-foreground">{value}</span>
     </div>
   )
 }
 
-function StationCard({ station }: { station: Station }) {
-  const [open, setOpen] = useState(false)
-  const meta = statusMeta[station.status]
-
-  return (
-    <div
-      className="rounded-md bg-card"
-      style={{ borderLeft: `2px solid ${meta.border}` }}
-    >
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-4 p-4 text-left"
-      >
-        <div className="min-w-0 flex-1">
-          <div className="font-mono text-[11px] text-amber">{station.id}</div>
-          <div className="mt-0.5 truncate text-sm font-medium text-foreground">
-            {station.prefecture} {station.name}
-          </div>
-        </div>
-
-        <span
-          className={`rounded-sm px-2 py-1 font-mono text-[9px] tracking-widest ${meta.badge}`}
-        >
-          {meta.label}
-        </span>
-
-        <div className="text-right">
-          <div
-            className="num-display text-3xl tabular leading-none"
-            style={{ color: batteryColor(station.battery) }}
-          >
-            {station.battery}
-            <span className="text-sm">%</span>
-          </div>
-          <div className="font-mono text-[9px] text-muted-foreground">
-            {station.voltage.toFixed(1)}V
-          </div>
-        </div>
-
-        <ChevronDown
-          className={`size-4 text-muted-foreground transition-transform ${
-            open ? 'rotate-180' : ''
-          }`}
-        />
-      </button>
-
-      {open && (
-        <div className="border-t border-border/50 p-4">
-          <div className="grid gap-x-8 gap-y-0 sm:grid-cols-2">
-            <DetailRow label="最終通信時刻" value={station.lastSeen} />
-            <DetailRow
-              label="本日検知件数"
-              value={`${station.detectionsToday} 件`}
-            />
-            <DetailRow
-              label="累計検知件数"
-              value={`${station.detectionsTotal} 件`}
-            />
-            <DetailRow
-              label="Starlink 信号強度"
-              value={`${station.starlink}%`}
-            />
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <StatusChip
-              icon={<Camera className="size-3.5" />}
-              label="カメラ"
-              on={station.camera}
-            />
-            <StatusChip
-              icon={<Volume2 className="size-3.5" />}
-              label="スピーカー"
-              on={station.speaker}
-            />
-            <StatusChip
-              icon={<Sun className="size-3.5" />}
-              label="ソーラー"
-              on={station.solar > 10}
-              detail={`${station.solar}%`}
-            />
-            <StatusChip
-              icon={<Satellite className="size-3.5" />}
-              label="Starlink"
-              on={station.starlink > 0}
-            />
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button className="rounded-sm bg-amber px-3 py-2 text-xs font-medium text-background hover:bg-amber-light">
-              カメラ確認
-            </button>
-            <button className="rounded-sm bg-white/5 px-3 py-2 text-xs font-medium text-foreground hover:bg-white/10">
-              テスト発報
-            </button>
-            <button className="rounded-sm bg-white/5 px-3 py-2 text-xs font-medium text-foreground hover:bg-white/10">
-              設定
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function StatusChip({
+function DeviceChip({
   icon,
   label,
-  on,
-  detail,
+  ok,
 }: {
   icon: React.ReactNode
   label: string
-  on: boolean
-  detail?: string
+  ok: boolean
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-sm bg-black/20 px-2.5 py-2">
-      <span style={{ color: on ? 'var(--green)' : 'var(--muted-foreground)' }}>
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 px-4 py-4">
+      <span style={{ color: ok ? 'var(--green)' : 'var(--muted-foreground)' }}>
         {icon}
       </span>
-      <div className="leading-tight">
-        <div className="text-[11px] text-foreground">{label}</div>
+      <div>
+        <div className="text-base font-medium">{label}</div>
         <div
-          className="font-mono text-[9px]"
-          style={{ color: on ? 'var(--green)' : 'var(--muted-foreground)' }}
+          className="text-sm"
+          style={{ color: ok ? 'var(--green)' : 'var(--muted-foreground)' }}
         >
-          {detail ?? (on ? '稼働中' : '停止')}
+          {ok ? '使えます' : '確認が必要です'}
         </div>
       </div>
     </div>
@@ -179,20 +42,77 @@ function StatusChip({
 
 export function StationsTab() {
   const { stations } = useBearDashboard()
+  const station = stations[0]
+
+  if (!station) {
+    return (
+      <div className="rounded-xl border border-border bg-white px-4 py-12 text-center shadow-sm">
+        <p className="text-base text-muted-foreground">カメラ情報を読み込めませんでした</p>
+      </div>
+    )
+  }
+
+  const online = station.status === 'online'
 
   return (
-    <div className="relative space-y-4 pb-20">
-      <SectionLabel>ステーション一覧 — {stations.length} 台</SectionLabel>
-      <div className="space-y-2.5">
-        {stations.map((s) => (
-          <StationCard key={s.id} station={s} />
-        ))}
+    <div className="space-y-5">
+      <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
+        <div className="flex items-center gap-3">
+          <StatusDot status={station.status} />
+          <div>
+            <SectionLabel>{station.name}</SectionLabel>
+            <p className="text-sm text-muted-foreground">{station.prefecture}</p>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-xl bg-muted/50 px-4 py-4 text-center">
+          <div
+            className="text-2xl font-bold"
+            style={{ color: online ? 'var(--green)' : 'var(--alert)' }}
+          >
+            {online ? 'カメラは動いています' : 'カメラを確認してください'}
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {online
+              ? '見張りは続いています。くまが来たら自動でお知らせします。'
+              : '電源・配線・ネットの状態を確認してください。'}
+          </p>
+        </div>
+
+        <div className="mt-5">
+          <InfoRow label="場所の名前" value={station.name} />
+          <InfoRow label="最後に確認した時間" value={station.lastSeen} />
+          <InfoRow
+            label="今日くまを見つけた回数"
+            value={`${station.detectionsToday} 回`}
+          />
+          <InfoRow
+            label="これまでの合計"
+            value={`${station.detectionsTotal} 回`}
+          />
+        </div>
       </div>
 
-      <button className="fixed bottom-6 right-6 z-30 flex items-center gap-2 rounded-md bg-amber px-4 py-3 text-sm font-medium text-background shadow-lg shadow-black/40 hover:bg-amber-light">
-        <Plus className="size-4" />
-        ステーション追加
-      </button>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <DeviceChip
+          icon={<Camera className="size-5" />}
+          label="カメラ"
+          ok={station.camera}
+        />
+        <DeviceChip
+          icon={<Volume2 className="size-5" />}
+          label="警告のスピーカー"
+          ok={station.speaker}
+        />
+      </div>
+
+      <div className="rounded-xl border border-amber/20 bg-amber/5 p-5">
+        <p className="text-base font-medium text-foreground">困ったときは</p>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          画面が止まった・くまが来たのに音が鳴らない、など気になることがあれば、
+          担当者にこの画面を見せて連絡してください。
+        </p>
+      </div>
     </div>
   )
 }

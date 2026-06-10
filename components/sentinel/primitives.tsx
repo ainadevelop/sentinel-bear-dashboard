@@ -7,7 +7,7 @@ export function SectionLabel({
   children: React.ReactNode
   className?: string
 }) {
-  return <div className={`label-mono ${className}`}>{children}</div>
+  return <h2 className={`section-title ${className}`}>{children}</h2>
 }
 
 export function StatusDot({
@@ -21,14 +21,14 @@ export function StatusDot({
     status === 'online'
       ? 'bg-green'
       : status === 'warning'
-        ? 'bg-amber-light'
+        ? 'bg-amber'
         : 'bg-muted-foreground'
   return (
     <span className={`relative inline-flex ${className}`}>
-      <span className={`size-2 rounded-full ${color}`} />
+      <span className={`size-3 rounded-full ${color}`} />
       {status === 'online' && (
         <span
-          className={`absolute inset-0 size-2 rounded-full ${color} pulse-dot`}
+          className={`absolute inset-0 size-3 rounded-full ${color} pulse-dot`}
         />
       )}
     </span>
@@ -37,7 +37,7 @@ export function StatusDot({
 
 export function BearGlyph({
   size = 18,
-  className = 'text-amber-light',
+  className = 'text-amber',
 }: {
   size?: number
   className?: string
@@ -46,7 +46,7 @@ export function BearGlyph({
     <span
       className={`inline-flex items-center justify-center ${className}`}
       role="img"
-      aria-label="熊検知"
+      aria-label="くま"
     >
       <PawPrint style={{ width: size, height: size }} strokeWidth={2} />
     </span>
@@ -55,13 +55,13 @@ export function BearGlyph({
 
 export function batteryColor(pct: number) {
   if (pct >= 50) return 'var(--green)'
-  if (pct >= 20) return 'var(--amber-light)'
+  if (pct >= 20) return 'var(--amber)'
   return 'var(--alert)'
 }
 
 export function BatteryBar({ pct }: { pct: number }) {
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/40">
+    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
       <div
         className="h-full rounded-full transition-all"
         style={{ width: `${pct}%`, background: batteryColor(pct) }}

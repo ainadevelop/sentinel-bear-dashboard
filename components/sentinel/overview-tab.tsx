@@ -1,183 +1,124 @@
 'use client'
 
-import {
-  Bar,
-  BarChart,
-  Cell,
-  LabelList,
-  ResponsiveContainer,
-  XAxis,
-} from 'recharts'
 import { useBearDashboard } from '@/lib/bear-context'
-import { BatteryBar, BearGlyph, SectionLabel, StatusDot } from './primitives'
+import { BearGlyph, SectionLabel, StatusDot } from './primitives'
 
-function KpiCard({
-  label,
+function SimpleCard({
+  title,
   value,
-  accent,
-  suffix,
+  note,
+  accent = 'var(--foreground)',
 }: {
-  label: string
-  value: number
-  accent: string
-  suffix?: string
+  title: string
+  value: string
+  note?: string
+  accent?: string
 }) {
   return (
-    <div
-      className="rounded-md bg-card p-4"
-      style={{ borderLeft: `2px solid ${accent}` }}
-    >
-      <SectionLabel>{label}</SectionLabel>
-      <div className="mt-2 flex items-baseline gap-1">
-        <span className="num-display text-5xl tabular" style={{ color: accent }}>
-          {value}
-        </span>
-        {suffix && (
-          <span className="font-mono text-xs text-muted-foreground">
-            {suffix}
-          </span>
-        )}
+    <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
+      <div className="text-sm text-muted-foreground">{title}</div>
+      <div className="mt-2 text-3xl font-bold tabular" style={{ color: accent }}>
+        {value}
       </div>
+      {note && <div className="mt-2 text-sm text-muted-foreground">{note}</div>}
     </div>
   )
 }
 
 export function OverviewTab() {
-  const { detections, KPI, stations, weeklyData } = useBearDashboard()
+  const { detections, KPI, stations } = useBearDashboard()
+  const station = stations[0]
+  const isSafe = KPI.today === 0 && detections.length === 0
+  const cameraOk = station?.status === 'online'
 
   return (
-    <div className="space-y-4">
-      {/* KPI Row */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <KpiCard
-          label="稼働中台数"
-          value={KPI.online}
-          accent="var(--green)"
-          suffix={`/ ${KPI.totalStations} 台`}
+    <div className="space-y-5">
+      <div
+        className={`rounded-2xl border p-6 text-center shadow-sm ${
+          isSafe
+            ? 'border-green/30 bg-green/5'
+            : 'border-alert/30 bg-alert/5'
+        }`}
+      >
+        <div className="mx-auto mb-3 flex size-16 items-center justify-center rounded-full bg-white shadow-sm">
+          <BearGlyph size={36} className={isSafe ? 'text-green' : 'text-alert'} />
+        </div>
+        <h1 className="text-2xl font-bold text-foreground">
+          {isSafe ? '今はくまは見つかっていません' : 'くまを見つけました'}
+        </h1>
+        <p className="mt-2 text-base text-muted-foreground">
+          {isSafe
+            ? 'カメラは見張りを続けています。くまが来たら音とお知らせが届きます。'
+            : '警告音とお知らせを送りました。記録タブで詳しく見られます。'}
+        </p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <SimpleCard
+          title="今日くまを見つけた回数"
+          value={`${KPI.today} 回`}
+          accent={KPI.today > 0 ? 'var(--alert)' : 'var(--green)'}
         />
-        <KpiCard
-          label="本日検知件数"
-          value={KPI.today}
-          accent="var(--amber-light)"
-          suffix="件"
+        <SimpleCard
+          title="これまでの合計"
+          value={`${KPI.cumulative} 回`}
         />
-        <KpiCard
-          label="要確認台数"
-          value={KPI.needsAttention}
-          accent={KPI.needsAttention > 0 ? 'var(--alert)' : 'var(--green)'}
-          suffix="台"
-        />
-        <KpiCard
-          label="累計検知件数"
-          value={KPI.cumulative}
-          accent="var(--foreground)"
-          suffix="件"
+        <SimpleCard
+          title="カメラの状態"
+          value={cameraOk ? '動いています' : '確認が必要'}
+          note={cameraOk ? 'よく見えています' : '電源や配線を確認してください'}
+          accent={cameraOk ? 'var(--green)' : 'var(--alert)'}
         />
       </div>
 
-      {/* Main grid */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        {/* Recent detections */}
-        <div className="rounded-md bg-card p-4">
-          <SectionLabel>直近の検知</SectionLabel>
-          <div className="mt-3 space-y-1.5">
-            {detections.map((d, i) => (
+      <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
+        <SectionLabel>さいきんの記録</SectionLabel>
+        <p className="section-hint mt-1">くまを見つけたときの記録です</p>
+
+        <div className="mt-4 space-y-3">
+          {detections.length === 0 ? (
+            <div className="rounded-lg bg-muted px-4 py-8 text-center text-base text-muted-foreground">
+              まだ記録はありません
+            </div>
+          ) : (
+            detections.slice(0, 5).map((d) => (
               <div
                 key={d.id}
-                className="flex items-center gap-3 rounded-sm bg-black/20 px-3 py-2.5"
-                style={
-                  i === 0 ? { borderLeft: '2px solid var(--alert)' } : undefined
-                }
+                className="flex items-center gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3"
               >
-                <BearGlyph size={20} className="text-amber" />
+                <BearGlyph size={22} className="text-amber" />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium text-foreground">
+                  <div className="text-base font-medium text-foreground">
                     {d.stationName}
                   </div>
-                  <div className="font-mono text-[10px] text-muted-foreground">
-                    {d.stationId} · {d.time}
-                  </div>
+                  <div className="text-sm text-muted-foreground">{d.time}</div>
                 </div>
                 <div className="text-right">
-                  <div
-                    className="num-display text-2xl tabular"
-                    style={{
-                      color:
-                        d.confidence >= 90
-                          ? 'var(--alert)'
-                          : 'var(--amber-light)',
-                    }}
-                  >
-                    {d.confidence}
-                    <span className="text-xs">%</span>
+                  <div className="text-xl font-bold text-alert tabular">
+                    {d.confidence}%
                   </div>
-                </div>
-                <span className="rounded-sm bg-amber/15 px-2 py-1 font-mono text-[9px] text-amber-light">
-                  警告音発報済
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Station status */}
-        <div className="rounded-md bg-card p-4">
-          <SectionLabel>ステーション状態</SectionLabel>
-          <div className="mt-3 space-y-2.5">
-            {stations.map((s) => (
-              <div key={s.id} className="flex items-center gap-3">
-                <StatusDot status={s.status} />
-                <div className="w-28 shrink-0">
-                  <div className="truncate text-sm text-foreground">
-                    {s.name}
-                  </div>
-                  <div className="font-mono text-[9px] text-muted-foreground">
-                    {s.id} · {s.lastSeen}
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <BatteryBar pct={s.battery} />
-                </div>
-                <div className="w-10 text-right font-mono text-xs tabular text-muted-foreground">
-                  {s.battery}%
+                  <div className="text-xs text-muted-foreground">くまの可能性</div>
                 </div>
               </div>
-            ))}
-          </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Weekly chart */}
-      <div className="rounded-md bg-card p-4">
-        <SectionLabel>週次検知グラフ</SectionLabel>
-        <div className="mt-4 h-56">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={weeklyData} margin={{ top: 24, bottom: 0 }}>
-              <XAxis
-                dataKey="day"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
-              />
-              <Bar dataKey="count" radius={[2, 2, 0, 0]} maxBarSize={48}>
-                <LabelList
-                  dataKey="count"
-                  position="top"
-                  fill="var(--foreground)"
-                  fontSize={12}
-                  fontFamily="var(--font-mono)"
-                />
-                {weeklyData.map((entry, i) => (
-                  <Cell
-                    key={i}
-                    fill={entry.today ? 'var(--amber-light)' : '#6b4408'}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+      {station && (
+        <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
+          <SectionLabel>見張り場所</SectionLabel>
+          <div className="mt-3 flex items-center gap-3">
+            <StatusDot status={station.status} />
+            <div>
+              <div className="text-base font-medium">{station.name}</div>
+              <div className="text-sm text-muted-foreground">
+                {station.prefecture} · 最後の確認 {station.lastSeen}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

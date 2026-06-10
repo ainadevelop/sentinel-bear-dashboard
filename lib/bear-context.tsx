@@ -60,9 +60,9 @@ interface BearDashboardContextValue {
 const BearDashboardContext = createContext<BearDashboardContextValue | null>(null)
 
 const STATION_NAMES: Record<string, { name: string; prefecture: string }> = {
-  'UMEDAYA-001': { name: '梅田屋 上野', prefecture: '東京都' },
-  'BEAR-001': { name: '梅田屋 上野', prefecture: '東京都' },
-  'TEST-001': { name: 'テストステーション', prefecture: '東京都' },
+  'UMEDAYA-001': { name: '梅田屋 上野の畑', prefecture: '東京都' },
+  'BEAR-001': { name: '梅田屋 上野の畑', prefecture: '東京都' },
+  'TEST-001': { name: 'テスト用カメラ', prefecture: '東京都' },
 }
 
 function formatLastSeen(timestamp?: string | null) {

@@ -18,35 +18,32 @@ export function AlertBanner({
   onClick: () => void
 }) {
   return (
-    <div className="slide-down fixed inset-x-0 top-0 z-50">
+    <div className="slide-down fixed inset-x-0 top-0 z-50 px-3 pt-3">
       <div
         role="button"
         tabIndex={0}
         onClick={onClick}
         onKeyDown={(e) => e.key === 'Enter' && onClick()}
-        className="flex cursor-pointer items-center gap-3 bg-alert px-4 py-3 md:px-6"
+        className="mx-auto flex max-w-3xl cursor-pointer items-center gap-3 rounded-xl bg-alert px-4 py-4 text-white shadow-lg"
       >
-        <BearGlyph size={24} className="text-foreground" />
-        <span className="num-display text-xl text-foreground">熊検知</span>
-        <span className="hidden h-4 w-px bg-foreground/30 sm:block" />
-        <span className="truncate text-sm font-medium text-foreground">
-          {alert.station}
-        </span>
-        <span className="font-mono text-sm text-foreground/90">
-          信頼度 {alert.confidence}%
-        </span>
-        <span className="ml-auto hidden rounded-sm bg-black/25 px-2 py-1 font-mono text-[10px] text-foreground sm:block">
-          警告音発報済
-        </span>
+        <BearGlyph size={28} className="text-white" />
+        <div className="min-w-0 flex-1">
+          <div className="text-lg font-bold">くまを見つけました</div>
+          <div className="truncate text-sm">{alert.station}</div>
+        </div>
+        <div className="text-right">
+          <div className="text-2xl font-bold tabular">{alert.confidence}%</div>
+          <div className="text-xs">くまの可能性</div>
+        </div>
         <button
           onClick={(e) => {
             e.stopPropagation()
             onDismiss()
           }}
-          className="flex size-7 items-center justify-center rounded-sm text-foreground hover:bg-black/20"
+          className="flex size-9 items-center justify-center rounded-full bg-white/20 hover:bg-white/30"
           aria-label="閉じる"
         >
-          <X className="size-4" />
+          <X className="size-5" />
         </button>
       </div>
     </div>

@@ -5,27 +5,20 @@ import { TopNav, type TabKey } from './top-nav'
 import { OverviewTab } from './overview-tab'
 import { StationsTab } from './stations-tab'
 import { HistoryTab } from './history-tab'
-import { MapTab } from './map-tab'
-import { AnalysisTab } from './analysis-tab'
-import { SettingsTab } from './settings-tab'
 import { AlertBanner, type AlertData } from './alert-banner'
 import { BearDashboardProvider, useBearDashboard } from '@/lib/bear-context'
 
 function DashboardSkeleton() {
   return (
     <div className="min-h-screen animate-pulse bg-background">
-      <div className="h-14 border-b border-border bg-card" />
-      <main className="mx-auto max-w-[1400px] space-y-4 px-4 py-5 md:px-6">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-24 rounded-md bg-card" />
+      <div className="h-28 border-b border-border bg-white" />
+      <main className="mx-auto max-w-3xl space-y-4 px-4 py-5">
+        <div className="h-40 rounded-2xl bg-white" />
+        <div className="grid gap-3 sm:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-24 rounded-xl bg-white" />
           ))}
         </div>
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="h-72 rounded-md bg-card" />
-          <div className="h-72 rounded-md bg-card" />
-        </div>
-        <div className="h-56 rounded-md bg-card" />
       </main>
     </div>
   )
@@ -34,15 +27,17 @@ function DashboardSkeleton() {
 function DashboardError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-6">
-      <div className="max-w-md rounded-md bg-card p-6 text-center">
-        <div className="font-mono text-xs text-amber">SENTINEL BEAR</div>
-        <h1 className="mt-2 text-lg font-medium text-foreground">データ取得エラー</h1>
+      <div className="max-w-md rounded-2xl border border-border bg-white p-8 text-center shadow-sm">
+        <h1 className="text-xl font-bold text-foreground">データを読み込めませんでした</h1>
+        <p className="mt-3 text-base text-muted-foreground">
+          ネットの状態を確認して、もう一度お試しください。
+        </p>
         <p className="mt-2 text-sm text-muted-foreground">{message}</p>
         <button
           onClick={onRetry}
-          className="mt-4 rounded-sm bg-amber px-4 py-2 text-sm font-medium text-background hover:bg-amber-light"
+          className="mt-6 rounded-xl bg-amber px-6 py-3 text-base font-medium text-white hover:bg-amber-light"
         >
-          再試行
+          もう一度読み込む
         </button>
       </div>
     </div>
@@ -63,14 +58,14 @@ function DashboardContent() {
     lastAlertId.current = latest.id
     const station = stations.find((s) => s.id === latest.stationId)
     setAlert({
-      station: `${station?.prefecture ?? ''} ${latest.stationName} (${latest.stationId})`.trim(),
+      station: `${station?.prefecture ?? ''} ${latest.stationName}`.trim(),
       confidence: latest.confidence,
     })
   }, [detections, stations])
 
   useEffect(() => {
     if (!alert) return
-    const t = setTimeout(() => setAlert(null), 8000)
+    const t = setTimeout(() => setAlert(null), 10000)
     return () => clearTimeout(t)
   }, [alert])
 
@@ -92,23 +87,20 @@ function DashboardContent() {
 
       <TopNav active={tab} onChange={setTab} />
 
-      <main className="mx-auto max-w-[1400px] px-4 py-5 md:px-6">
+      <main className="mx-auto max-w-3xl px-4 py-5">
         {tab === 'overview' && <OverviewTab />}
-        {tab === 'stations' && <StationsTab />}
         {tab === 'history' && <HistoryTab />}
-        {tab === 'map' && <MapTab />}
-        {tab === 'analysis' && <AnalysisTab />}
-        {tab === 'settings' && <SettingsTab />}
+        {tab === 'stations' && <StationsTab />}
       </main>
 
-      <footer className="border-t border-border px-6 py-6">
-        <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-2 sm:flex-row">
-          <div className="num-display text-base text-amber/70">
-            検知から3秒。3分では間に合わない。
-          </div>
-          <div className="font-mono text-[10px] text-muted-foreground">
-            SENTINEL BEAR · v1.0 · 熊検知監視システム
-          </div>
+      <footer className="border-t border-border bg-white px-4 py-6">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-sm text-muted-foreground">
+            くまを見つけてから、お知らせまで約3秒
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            くま見張り番 · 梅田屋 上野
+          </p>
         </div>
       </footer>
     </div>
