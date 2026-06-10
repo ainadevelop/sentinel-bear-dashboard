@@ -108,13 +108,22 @@ export function SettingsTab() {
       })
 
     try {
+      const pause = (ms: number) =>
+        new Promise<void>((resolve) => {
+          setTimeout(resolve, ms)
+        })
+
       await playOne('/bear/bear_warning.wav')
       if (playbackAbortRef.current) return
-      await new Promise((resolve) => setTimeout(resolve, 700))
+      await pause(700)
       if (playbackAbortRef.current) return
       await playOne('/bear/bear_voice.wav')
       if (playbackAbortRef.current) return
-      setSoundResult('チャイムの後、案内をゆっくり読み上げました。')
+      await pause(400)
+      if (playbackAbortRef.current) return
+      await playOne('/bear/bear_closing.wav')
+      if (playbackAbortRef.current) return
+      setSoundResult('ピンポンパンポン → 2回読み上げ → 締めチャイムで再生しました。')
     } catch {
       if (!playbackAbortRef.current) {
         setSoundResult('ブラウザでの再生に失敗しました。音量とブラウザの自動再生設定を確認してください。')
@@ -271,7 +280,7 @@ export function SettingsTab() {
         <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">発報の流れ</p>
           <p className="mt-2 text-foreground">
-            ① チャイム（3音）→ ② ゆっくり読み上げ「熊が出没した可能性があります。確認し、避難してください。」
+            ① ピンポンパンポン → ② 案内（2回・「繰り返します」付き）→ ③ ピンポンパンポン
           </p>
         </div>
 
@@ -286,7 +295,7 @@ export function SettingsTab() {
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm leading-relaxed text-muted-foreground">
             <span className="font-semibold text-foreground">ブラウザで試聴</span>
-            — チャイムのあと、ゆっくりはっきり読み上げます（屋外でも聞き取りやすい速度）。
+            — 放送案内と同じ流れで、ゆっくりはっきり2回読み上げます。
           </p>
         </div>
 
