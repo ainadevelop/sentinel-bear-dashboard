@@ -84,10 +84,17 @@ export function SettingsTab() {
     setBrowserPlaying(true)
     setSoundResult(null)
     try {
-      const audio = new Audio('/bear/bear_alert.wav')
-      audio.volume = 0.8
-      await audio.play()
-      setSoundResult('「熊が出没した可能性があります。確認し、避難してください。」を再生しました。')
+      const playOne = (src: string) =>
+        new Promise<void>((resolve, reject) => {
+          const audio = new Audio(src)
+          audio.volume = 0.85
+          audio.onended = () => resolve()
+          audio.onerror = () => reject(new Error(src))
+          void audio.play().catch(reject)
+        })
+      await playOne('/bear/bear_warning.wav')
+      await playOne('/bear/bear_voice.wav')
+      setSoundResult('警告音の後、「熊が出没した可能性があります。確認し、避難してください。」を読み上げました。')
     } catch {
       setSoundResult('ブラウザでの再生に失敗しました。音量とブラウザの自動再生設定を確認してください。')
     } finally {
@@ -213,9 +220,9 @@ export function SettingsTab() {
 
       <Card title="音声案内の確認">
         <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm leading-relaxed text-muted-foreground">
-          <p className="font-semibold text-foreground">発報内容</p>
+          <p className="font-semibold text-foreground">発報の流れ</p>
           <p className="mt-2 text-foreground">
-            「熊が出没した可能性があります。確認し、避難してください。」
+            ① 警告音（3連ビープ）→ ②「熊が出没した可能性があります。確認し、避難してください。」
           </p>
         </div>
 
@@ -230,7 +237,7 @@ export function SettingsTab() {
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm leading-relaxed text-muted-foreground">
             <span className="font-semibold text-foreground">ブラウザで試聴</span>
-            — Microsoft 音声（Nanami）で生成した案内を、この端末から再生します。
+            — 警告音のあと、Microsoft 音声（Nanami）で案内を読み上げます。
           </p>
         </div>
 
@@ -323,7 +330,7 @@ export function SettingsTab() {
                 <h3 className="text-lg font-bold text-foreground">音声案内テストを実行しますか？</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   現地のスピーカーから<strong className="text-foreground">大音量</strong>で
-                  「熊が出没した可能性があります。確認し、避難してください。」が流れます。
+                  警告音の後に音声案内が流れます。
                   周囲の安全を確認し、了承のうえ実行してください。
                 </p>
               </div>
