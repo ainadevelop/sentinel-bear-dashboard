@@ -43,8 +43,24 @@ export function SettingsTab() {
   const { stations } = useBearDashboard()
   const [threshold, setThreshold] = useState(70)
   const [soundTesting, setSoundTesting] = useState(false)
+  const [browserPlaying, setBrowserPlaying] = useState(false)
   const [soundResult, setSoundResult] = useState<string | null>(null)
   const [showSoundConfirm, setShowSoundConfirm] = useState(false)
+
+  async function playBrowserPreview() {
+    setBrowserPlaying(true)
+    setSoundResult(null)
+    try {
+      const audio = new Audio('/bear/bear_alert.wav')
+      audio.volume = 0.8
+      await audio.play()
+      setSoundResult('ブラウザから警告音を再生しました。')
+    } catch {
+      setSoundResult('ブラウザでの再生に失敗しました。音量とブラウザの自動再生設定を確認してください。')
+    } finally {
+      setBrowserPlaying(false)
+    }
+  }
 
   async function runSoundTest() {
     setShowSoundConfirm(false)
@@ -102,14 +118,30 @@ export function SettingsTab() {
       </Card>
 
       <Card title="警告音の確認">
+        <div className="rounded-lg border border-border bg-muted/30 p-4">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            <span className="font-semibold text-foreground">ブラウザで試聴</span>
+            — この端末のスピーカーから再生します。どこからでも確認できます。
+          </p>
+        </div>
+
+        <button
+          onClick={() => void playBrowserPreview()}
+          disabled={browserPlaying}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-alert bg-white px-4 py-3 text-sm font-semibold text-alert hover:bg-alert/5 disabled:opacity-50"
+        >
+          <Volume2 className="size-5" />
+          {browserPlaying ? '再生中…' : 'ブラウザで警告音を聴く'}
+        </button>
+
         <div className="rounded-lg border border-alert/30 bg-alert/5 p-4">
           <div className="flex gap-3">
             <AlertTriangle className="size-5 shrink-0 text-alert" />
             <div className="text-sm leading-relaxed text-muted-foreground">
-              <p className="font-semibold text-alert">大音量が出る可能性があります</p>
+              <p className="font-semibold text-alert">現地スピーカー（大音量）</p>
               <p className="mt-1">
-                テスト発報を実行すると、現地のスピーカーから警告音が鳴ります。
-                周囲の方へ事前に告知のうえ、音量にご注意ください。
+                Pi5 設置現場のスピーカーから実際の警告音を発報します。
+                周囲の方へ事前に告知のうえ実行してください。
               </p>
             </div>
           </div>
@@ -121,7 +153,7 @@ export function SettingsTab() {
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-alert px-4 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
         >
           <Volume2 className="size-5" />
-          {soundTesting ? '発報中…' : '警告音テスト発報'}
+          {soundTesting ? '発報中…' : '現地スピーカーでテスト発報'}
         </button>
 
         {soundResult && (

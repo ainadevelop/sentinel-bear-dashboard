@@ -6,7 +6,6 @@ import { OverviewTab } from './overview-tab'
 import { CameraTab } from './camera-tab'
 import { StationsTab } from './stations-tab'
 import { HistoryTab } from './history-tab'
-import { AlbumTab } from './album-tab'
 import { MapTab } from './map-tab'
 import { AnalysisTab } from './analysis-tab'
 import { SettingsTab } from './settings-tab'
@@ -70,7 +69,6 @@ function DashboardContent() {
         {tab === 'overview' && <OverviewTab />}
         {tab === 'camera' && <CameraTab />}
         {tab === 'history' && <HistoryTab />}
-        {tab === 'album' && <AlbumTab />}
         {tab === 'map' && <MapTab />}
         {tab === 'analysis' && <AnalysisTab />}
         {tab === 'stations' && <StationsTab />}
