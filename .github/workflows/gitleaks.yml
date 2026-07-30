@@ -1,0 +1,31 @@
+name: Secret scan (gitleaks)
+
+# GitHub の Secret Scanning / Push Protection は Private リポジトリでは有料アドオン
+# (GitHub Secret Protection) が必要なため、同等の検査を OSS の gitleaks で代替する。
+# 作業ツリーを検査し、APIキー・パスワード等が含まれたコミットを落とす。
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install gitleaks
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin gitleaks
+          gitleaks version
+        env:
+          GITLEAKS_VERSION: 8.30.1
+
+      - name: Scan working tree
+        run: gitleaks dir . --no-banner --redact --verbose
